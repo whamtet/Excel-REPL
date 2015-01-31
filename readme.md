@@ -37,6 +37,7 @@ Errors are caught and returned as text within the output cells.  The stacktrace 
 ClojureCLR does not implement slurp for http by default.  Use the Auxilliary class as follows
 
 (import ClojureExcel.AuxClass)
+
 (AuxClass/slurpSite "http://www.google.com")
 
 ##Build and Installation
