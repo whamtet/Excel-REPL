@@ -12,28 +12,29 @@ namespace ClojureExcel
 {
     public static class AuxClass
     {
-        public static string slurpSite(String site) {
+        public static string slurpSite(String site)
+        {
+            site = Uri.EscapeDataString(site);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(site);
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
-HttpWebRequest request = (HttpWebRequest)WebRequest.Create(site);
-HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            Stream receiveStream = response.GetResponseStream();
+            StreamReader readStream = null;
 
-  Stream receiveStream = response.GetResponseStream();
-  StreamReader readStream = null;
+            if (response.CharacterSet == null)
+            {
+                readStream = new StreamReader(receiveStream);
+            }
+            else
+            {
+                readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
+            }
 
-  if (response.CharacterSet == null)
-  {
-     readStream = new StreamReader(receiveStream);
-  }
-  else
-  {
-     readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
-  }
+            string data = readStream.ReadToEnd();
 
-  string data = readStream.ReadToEnd();
-
-  response.Close();
-  readStream.Close();
-    return data;
-}
+            response.Close();
+            readStream.Close();
+            return data;
+        }
     }
 }

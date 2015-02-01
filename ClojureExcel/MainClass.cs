@@ -12,14 +12,17 @@ namespace ClojureExcel
 {
     public static class MainClass
     {
-        private static IFn read_string = clojure.clr.api.Clojure.var("clojure.core", "read-string");
-        private static IFn eval = clojure.clr.api.Clojure.var("clojure.core", "eval");
+        private static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
 
         private static Object doublize(object o)
         {
             if (o is Ratio)
             {
                 return ((Ratio)o).ToDouble(null);
+            }
+            if (o is Var || o.GetType().ToString() == "System.RuntimeType")
+            {
+                return o.ToString();
             }
             if (o == null)
             {
@@ -57,10 +60,11 @@ namespace ClojureExcel
         
         private static Object my_eval(String input)
         {
+            //return pack(Regex.Split(input, "\n"));
             Object o;
             try
             {
-                o = eval.invoke(read_string.invoke(input));
+                o = load_string.invoke(input);
             }
             catch (Exception e)
             {
@@ -203,14 +207,21 @@ namespace ClojureExcel
                 return oot;
             }
         }
+        private static String getSheetName()
+        {
+            ExcelReference reference = (ExcelReference)XlCall.Excel(XlCall.xlfCaller);
+            string sheetName = (string)XlCall.Excel(XlCall.xlSheetNm, reference);
+            sheetName = Regex.Split(sheetName, "\\]")[1];
+            return sheetName;
+        }
         
 
         [ExcelFunction(Description = "My first .NET function")]
         public static object Load(Object[] name)
         {
-            
+
             StringBuilder input = new StringBuilder();
-            input.Append("(do \n");
+            input.Append(String.Format("(ns {0})\n", getSheetName()));
             foreach (Object s in name)
             {
                 if (s.GetType() != typeof(ExcelEmpty))
@@ -218,7 +229,6 @@ namespace ClojureExcel
                     input.Append(s + "\n");
                 }
             }
-            input.Append(")");
             
             return my_eval(input.ToString());
             
