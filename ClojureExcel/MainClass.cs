@@ -64,6 +64,7 @@ namespace ClojureExcel
             Object o;
             try
             {
+                input = String.Format("(ns {0})\n", getSheetName()) + input;
                 o = load_string.invoke(input);
             }
             catch (Exception e)
@@ -221,7 +222,6 @@ namespace ClojureExcel
         {
 
             StringBuilder input = new StringBuilder();
-            input.Append(String.Format("(ns {0})\n", getSheetName()));
             foreach (Object s in name)
             {
                 if (s.GetType() != typeof(ExcelEmpty))
