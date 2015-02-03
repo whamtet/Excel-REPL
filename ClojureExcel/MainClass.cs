@@ -13,6 +13,7 @@ namespace ClojureExcel
     public static class MainClass
     {
         private static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
+        private static string msg;
 
         private static Object doublize(object o)
         {
@@ -57,6 +58,7 @@ namespace ClojureExcel
                 return doublize(o);
             }
         }
+        
         
         private static Object my_eval(String input)
         {
@@ -232,6 +234,11 @@ namespace ClojureExcel
             
             return my_eval(input.ToString());
             
+        }
+        [ExcelFunction(Description = "Evaluate in Octant")]
+        public static string Require(string s)
+        {
+            return my_eval(String.Format("(require '{0})", s)).ToString();
         }
         [ExcelFunction(Description = "Evaluate in Octant")]
         public static Object Invoke1(String f, Object[] a0)
