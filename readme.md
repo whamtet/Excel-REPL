@@ -14,7 +14,7 @@ As much as we all love VBA there are better languages available such as ... Cloj
 
     =Load(A:A)
 
-Concatenates the contents of selected cells and evaluates them within a do loop.
+Concatenates the contents of selected cells and evaluates them within a do loop.  The namespace is the active worksheet.
 
 ##Invoke
 
