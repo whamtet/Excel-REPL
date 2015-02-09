@@ -50,15 +50,9 @@ ClojureCLR does not implement slurp for http by default.  Use the Auxilliary cla
 
 ##Build and Installation
 
-Excel Repl is a Microsoft Visual Studio solution.  Install Visual Studio 2013 (the free Express Edition is sufficient) and import this repository.  Visual Studio's package manager is called NuGet.  The NuGet dependencies are Clojure and Excel-DNA.
+Create a Visual Studio C Sharp Class Project and add the two C Sharp source files.  Use Visual Studio's package manager NuGet to install Clojure and Excel-DNA dependencies.
 
-To Install into Excel without Visual Studio copy the contents of ClojureExcel/bin/Debug into %HomeDirectory%\AppData\Roaming\Microsoft\AddIns.  Then open Excel
-
-1) For Excel 2013 select File > Options > Add-Ins > Go (at the bottom) > Browse.  Select ClojureExcel-AddIn.xll and click ok.
-
-2) For earlier editions click Tools > Add-Ins > Browse and select ClojureExcel-AddIn.xll.
-
-Provided that you have copied the binary files correctly Excel Repl will automatically load every time you start Excel.
+To install on a machine copy the contents of Excel-REPL/bin/Debug into ~/AppData/Roaming/Microsoft/AddIns and then add via the add-ins menu.  Excel-REPL will then auto-install every time you start Excel.
 
 ##System Requirements
 
