@@ -52,7 +52,7 @@ ClojureCLR does not implement slurp for http by default.  Use the Auxilliary cla
 
 Create a Visual Studio C Sharp Class Project and add the two C Sharp source files.  Use Visual Studio's package manager NuGet to install Clojure and Excel-DNA dependencies.
 
-To install on a machine copy the contents of Excel-REPL/bin/Debug into ~/AppData/Roaming/Microsoft/AddIns and then add via the add-ins menu.  Excel-REPL will then auto-install every time you start Excel.
+To install on a machine copy the contents of Excel-REPL/bin/Debug into ~/AppData/Roaming/Microsoft/AddIns and then add via the Excel add-ins menu.  Excel-REPL will then auto-install every time you start Excel.
 
 ##System Requirements
 
