@@ -21,7 +21,7 @@ namespace ClojureExcel
             {
                 return ((Ratio)o).ToDouble(null);
             }
-            if (o is Var || o.GetType().ToString() == "System.RuntimeType")
+            if (o is Var || o.GetType().ToString() == "System.RuntimeType" || o is IFn)
             {
                 return o.ToString();
             }
