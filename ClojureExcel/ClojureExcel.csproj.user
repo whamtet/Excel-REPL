@@ -1,8 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartAction>Program</StartAction>
-    <StartProgram>C:\Program Files\Microsoft Office 15\Root\Office15\EXCEL.EXE</StartProgram>
-    <StartArguments>"\\psf\home\documents\visual studio 2013\Projects\ClojureExcel\ClojureExcel\bin\Debug\ClojureExcel-AddIn.xll"</StartArguments>
-  </PropertyGroup>
-</Project>
