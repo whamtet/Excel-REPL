@@ -215,6 +215,7 @@ namespace ClojureExcel
             ExcelReference reference = (ExcelReference)XlCall.Excel(XlCall.xlfCaller);
             string sheetName = (string)XlCall.Excel(XlCall.xlSheetNm, reference);
             sheetName = Regex.Split(sheetName, "\\]")[1];
+            sheetName = sheetName.Replace(" ", "");
             return sheetName;
         }
         
