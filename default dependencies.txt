@@ -1,0 +1,17 @@
+Microsoft.CSharp
+System
+System.Core
+System.Data
+System.Data.DataSetExtensions
+System.Xml
+System.Xml.Linq
+
+ExcelDNA
+========
+ExcelDna.Integration
+
+Clojure
+=======
+Clojure
+Microsoft.Dynamic
+Microsoft.Scripting

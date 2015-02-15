@@ -44,9 +44,28 @@ Errors are caught and returned as text within the output cells.  The stacktrace 
 
 ClojureCLR does not implement slurp for http by default.  Use the Auxilliary class as follows
 
+```clojure
 (import ClojureExcel.AuxClass)
 
 (AuxClass/slurpSite "http://www.google.com")
+```
+
+NREPL is included to connect with an external Clojure process
+
+```clojure
+(require '[clojure.tools.nrepl :as nrepl])
+
+(defn remote-eval [code]
+  (with-open [
+              conn (nrepl/url-connect "nrepl://localhost:63487")
+              ]
+    (->
+     (nrepl/client conn 10000)    ; message receive timeout required
+     (nrepl/message {:op "eval" :code code})
+     nrepl/response-values)))
+
+(remote-eval "(def b 3)")
+```
 
 ##Build and Installation
 

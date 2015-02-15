@@ -8,13 +8,47 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using Ionic.Zip;
 
 namespace ClojureExcel
 {
     public static class MainClass
     {
-        private static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
+        static MainClass()
+        {
+            try
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                
+                var resourceName = "Excel_REPL.nrepl.zip";
+                Stream stream = assembly.GetManifestResourceStream(resourceName);
+                ZipFile f = ZipFile.Read(stream);
+                
+                string tempPath = System.IO.Path.GetTempPath();
+                string tempFolder = tempPath + "\\Excel_REPL";
+                f.ExtractAll(tempFolder, ExtractExistingFileAction.OverwriteSilently);
+                stream.Close();
 
+                String loadPath = Environment.GetEnvironmentVariable("CLOJURE_LOAD_PATH");
+                if (loadPath == null)
+                {
+                    loadPath = tempFolder;
+                }
+                else
+                {
+                    loadPath += ";" + tempFolder;
+                }
+                Environment.SetEnvironmentVariable("CLOJURE_LOAD_PATH", loadPath);
+            }
+            catch (Exception e)
+            {
+                msg = e.ToString();
+            }
+
+            //Environment.SetEnvironmentVariable("CLOJURE_LOAD_PATH", "Z:\\Downloads\\clr.tools.nrepl\\src");
+        }
+        private static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
+        private static string msg;
         private static Object doublize(object o)
         {
             if (o is Ratio)
@@ -217,6 +251,11 @@ namespace ClojureExcel
             sheetName = Regex.Split(sheetName, "\\]")[1];
             sheetName = sheetName.Replace(" ", "");
             return sheetName;
+        }
+        [ExcelFunction(Description="hihi")]
+        public static String Test()
+        {
+            return MainClass.msg;
         }
         
         [ExcelFunction(Description = "My first .NET function")]
