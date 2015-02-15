@@ -7,13 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace ClojureExcel
 {
     public static class MainClass
     {
         private static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
-        private static string msg;
 
         private static Object doublize(object o)
         {
@@ -219,7 +219,6 @@ namespace ClojureExcel
             return sheetName;
         }
         
-
         [ExcelFunction(Description = "My first .NET function")]
         public static object Load(Object[] name)
         {
