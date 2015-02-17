@@ -8,7 +8,7 @@
 ```
 
 
-As much as we all love VBA there are better languages available such as ... Clojure.  Excel REPL makes it easy to start a ClojureCLR Repl from within Excel.  Simply install it as an Excel Add-In to provide two additional Excel Functions
+As much as we all love VBA there are better languages available such as ... Clojure.  Excel REPL makes it easy to start a ClojureCLR Repl from within Excel.  Simply install it as an Excel Add-In to provide a few additional Excel Functions
 
 ##Load
 
@@ -25,6 +25,18 @@ Concatenates the contents of selected cells and evaluates them in namespace Shee
 Invokes myFunction with the supplied arguments and returns the result.  Range arguments are provided as a Clojure vector unless the range is of length one, in which case they are the same as a single cell argument.
 
 Arity cannot be overloaded so you must use Invoke1, Invoke2 etc.  For functions with zero arguments simply use Load.
+
+##RInvoke
+
+    =RInvoke1("myFunction", A1)
+    =RInvoke2("myFunction", A2:A5, C6)
+    ...
+
+The same as Invoke however evaluates myFunction on a remote nrepl instance.  To define the remote address first invoke
+
+    =DefineClient("nrepl://host:port")
+
+
 
 ##Returning 1D and 2D arrays
 
