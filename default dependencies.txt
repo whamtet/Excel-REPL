@@ -15,3 +15,15 @@ Clojure
 Clojure
 Microsoft.Dynamic
 Microsoft.Scripting
+
+NetOffice Excel
+===============
+
+NetOffice
+OfficeApi
+VBIDEApi
+ExcelApi
+
+Misc
+====
+System.Drawing

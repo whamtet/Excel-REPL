@@ -81,9 +81,9 @@ NREPL is included to connect with an external Clojure process
 
 ##Build and Installation
 
-Create a Visual Studio C Sharp Class Project and add the two C Sharp source files.  Use Visual Studio's package manager NuGet to install Clojure and Excel-DNA dependencies.
+Create a Visual Studio C Sharp Class Project and add the two C Sharp source files.  Also add nrepl.zip as a resource file.  Tod do this include nrepl.zip in the project then right click -> properties -> embedded resource.  Use Visual Studio's package manager NuGet to install Clojure and Excel-DNA dependencies.
 
-To install on a machine copy the contents of Excel-REPL/bin/Debug into ~/AppData/Roaming/Microsoft/AddIns and then add via the Excel add-ins menu.  Excel-REPL will then auto-install every time you start Excel.
+To install on a machine copy the contents of Excel-REPL/bin/Debug into ~/AppData/Roaming/Microsoft/AddIns and then add via the Excel add-ins menu.  Excel-REPL will then auto-load every time you start Excel.
 
 ##System Requirements
 

@@ -1,4 +1,4 @@
-﻿using clojure.lang;
+using clojure.lang;
 using ExcelDna.Integration;
 using System;
 using System.Collections.Generic;
@@ -9,6 +9,9 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using Ionic.Zip;
+using NetOffice.ExcelApi;
+using System.Collections.Concurrent;
+using System.Web;
 
 namespace ClojureExcel
 {
@@ -19,37 +22,68 @@ namespace ClojureExcel
             try
             {
                 var assembly = Assembly.GetExecutingAssembly();
-                
+
                 var resourceName = "Excel_REPL.nrepl.zip";
                 Stream stream = assembly.GetManifestResourceStream(resourceName);
                 ZipFile f = ZipFile.Read(stream);
-                
+
                 string tempPath = System.IO.Path.GetTempPath();
                 string tempFolder = tempPath + "\\Excel_REPL";
                 f.ExtractAll(tempFolder, ExtractExistingFileAction.OverwriteSilently);
                 stream.Close();
+                appendLoadPath(tempFolder);
+                string clojureSrc = @"
+(import System.Environment)
+(import System.Text.RegularExpressions.Regex)
+(defn get-load-path []
+    (set (Regex/Split (Environment/GetEnvironmentVariable ""CLOJURE_LOAD_PATH"") "";"")))
+(defn set-load-path [s]
+    (let [
+        new-path (apply str (interpose "";"" s))
+        ]
+    (Environment/SetEnvironmentVariable ""CLOJURE_LOAD_PATH"" new-path)
+        new-path))
 
-                String loadPath = Environment.GetEnvironmentVariable("CLOJURE_LOAD_PATH");
-                if (loadPath == null)
-                {
-                    loadPath = tempFolder;
-                }
-                else
-                {
-                    loadPath += ";" + tempFolder;
-                }
-                Environment.SetEnvironmentVariable("CLOJURE_LOAD_PATH", loadPath);
+(defn append-load-path [new-path]
+    (set-load-path (conj (get-load-path) new-path)))";
+                Object[,] o = (Object[,])my_eval(clojureSrc, "clojure.core");
+                msg = (String)o[0, 0];
             }
             catch (Exception e)
             {
                 msg = e.ToString();
             }
 
-            //Environment.SetEnvironmentVariable("CLOJURE_LOAD_PATH", "Z:\\Downloads\\clr.tools.nrepl\\src");
+        }
+        public static BlockingCollection<Object> getCollection()
+        {
+            return new BlockingCollection<Object>();
+        }
+        public static HttpUtility getUtility()
+        {
+            return new HttpUtility();
+        }
+        public static String appendLoadPath(String newPath)
+        {
+            String loadPath = Environment.GetEnvironmentVariable("CLOJURE_LOAD_PATH");
+            if (loadPath == null)
+            {
+                loadPath = newPath;
+            }
+            else
+            {
+                loadPath += ";" + newPath;
+            }
+            Environment.SetEnvironmentVariable("CLOJURE_LOAD_PATH", loadPath);
+            return loadPath;
         }
         private static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
         private static IFn is_nil = clojure.clr.api.Clojure.var("clojure.core", "nil?");
         private static string msg;
+
+        //this section is dummy stuff to make sure things load correctly
+        public static Application a = Application.GetActiveInstance();
+
         private static Object doublize(object o)
         {
             if ((bool)is_nil.invoke(o))
@@ -93,8 +127,13 @@ namespace ClojureExcel
                 return doublize(o);
             }
         }
+        [ExcelFunction]
+        public static String GetMsg()
+        {
+            return msg;
+        }
         [ExcelFunction(Description = "define client")]
-        public static Object DefineClient(String connect_str)
+        public static Object DefineClient(Object connect_info)
         {
             string input = @"
 (require '[clojure.tools.nrepl :as nrepl])
@@ -113,6 +152,15 @@ nrepl/response-values)))
 ";
             try
             {
+                String connect_str;
+                if (connect_info is String)
+                {
+                  connect_str = (String) connect_info;
+                }
+                else
+                {
+                  connect_str = String.Format("nrepl://localhost:{0}", connect_info);
+                }
                 my_eval(String.Format(input, connect_str), "client");
                 return connect_str;
             }
@@ -146,7 +194,7 @@ nrepl/response-values)))
             }
             return process_output(o);
         }
-        
+
         private static Object process_output(Object o)
         {
             if ((bool) (is_nil.invoke(o)))
@@ -298,12 +346,21 @@ nrepl/response-values)))
             return sheetName;
         }
         [ExcelFunction(Description="hihi")]
-        public static String Test()
+        public static Object Test()
         {
-            return MainClass.msg;
+            try
+            {
+                ExcelExamplesCS45.Example01 e = new ExcelExamplesCS45.Example01();
+                e.RunExample();
+                return "done";
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
         }
-        
-        
+
+
         [ExcelFunction(Description = "My first .NET function")]
         public static object Load(Object[] name)
         {
@@ -316,114 +373,114 @@ nrepl/response-values)))
                     input.Append(s + "\n");
                 }
             }
-            
+
             return my_eval(input.ToString());
-            
+
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object Invoke1(String f, Object[] a0)
         {
             String s = "(" + f + " " + stringifies2(a0) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object Invoke2(String f, Object[] a0, Object[] a1)
         {
             String s = "(" + f + " " + stringifies2(a0, a1) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object Invoke3(String f, Object[] a0, Object[] a1, Object[] a2)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object Invoke4(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object Invoke5(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object Invoke6(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object Invoke7(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5, Object[] a6)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5, a6) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object Invoke8(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5, Object[] a6, Object[] a7)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5, a6, a7) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object Invoke9(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5, Object[] a6, Object[] a7, Object[] a8)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5, a6, a7, a8) + ")";
             return my_eval(s);
         }
 
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object RInvoke1(String f, Object[] a0)
         {
             String s = "(" + f + " " + stringifies2(a0) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object RInvoke2(String f, Object[] a0, Object[] a1)
         {
             String s = "(" + f + " " + stringifies2(a0, a1) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object RInvoke3(String f, Object[] a0, Object[] a1, Object[] a2)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object RInvoke4(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object RInvoke5(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object RInvoke6(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object RInvoke7(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5, Object[] a6)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5, a6) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object RInvoke8(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5, Object[] a6, Object[] a7)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5, a6, a7) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "Evaluate in Octant")]
+        [ExcelFunction(Description = "")]
         public static Object RInvoke9(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5, Object[] a6, Object[] a7, Object[] a8)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5, a6, a7, a8) + ")";
