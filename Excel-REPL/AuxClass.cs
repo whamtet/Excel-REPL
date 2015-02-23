@@ -12,7 +12,7 @@ namespace ClojureExcel
 {
     public static class AuxClass
     {
-        public static string slurpSite(String uri)
+        public static string SlurpSite(String uri)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
