@@ -39,6 +39,7 @@ namespace ClojureExcel
 (import System.Text.RegularExpressions.Regex)
 (import System.IO.Directory)
 (require '[clojure.repl :as r])
+(require 'clojure.pprint)
 
 (defn get-cd []
     (Directory/GetCurrentDirectory))
@@ -64,8 +65,17 @@ namespace ClojureExcel
 (defmacro source [x]
     `(with-out-strs (r/source ~x)))
 
+(defmacro doc [x]
+    `(with-out-strs (r/doc ~x)))
+
+(defmacro pprint [x]
+    `(with-out-strs (clojure.pprint/pprint ~x)))
+
+(defmacro time-str [x]
+    `(with-out-strs (time ~x)))
 ";
-                Object[,] o = (Object[,])my_eval(clojureSrc, "clojure.core");
+                Object[,] o = (Object[,]) my_eval(clojureSrc, "clojure.core");
+                
                 msg = (String)o[0, 0];
             }
             catch (Exception e)
@@ -157,17 +167,17 @@ namespace ClojureExcel
             string input = @"
 (require '[clojure.tools.nrepl :as nrepl])
 
+(def conn (nrepl/url-connect ""{0}""))
+(def client (nrepl/client conn 10000))
+
 (defn remote-eval [code]
-(with-open [
-conn (nrepl/url-connect ""{0}"")
-]
 (->
-(nrepl/client conn 10000)
+client
 (nrepl/message (hash-map :op ""eval"" :code code))
-nrepl/response-values)))
+nrepl/response-values))
 
 (defmacro eval2 [& body]
-`(remote-eval (nrepl/code ~@body)))
+`(first (remote-eval (nrepl/code ~@body))))
 ";
             try
             {
@@ -220,6 +230,7 @@ nrepl/response-values)))
             {
                 return pack("nil");
             }
+            
             if (o is IPersistentCollection) {
                 o = ((IPersistentCollection)o).seq();
             }
