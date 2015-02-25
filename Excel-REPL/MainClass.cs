@@ -34,48 +34,10 @@ namespace ClojureExcel
                 f.ExtractAll(tempFolder, ExtractExistingFileAction.OverwriteSilently);
                 stream.Close();
                 appendLoadPath(tempFolder);
-                string clojureSrc = @"
-(import System.Environment)
-(import System.Text.RegularExpressions.Regex)
-(import System.IO.Directory)
-(require '[clojure.repl :as r])
-(require 'clojure.pprint)
 
-(defn get-cd []
-    (Directory/GetCurrentDirectory))
-(defn set-cd [new-d]
-    (Directory/SetCurrentDirectory new-d))
-
-(defn get-load-path []
-    (set (Regex/Split (Environment/GetEnvironmentVariable ""CLOJURE_LOAD_PATH"") "";"")))
-
-(defn set-load-path [s]
-    (let [
-        new-path (apply str (interpose "";"" s))
-        ]
-    (Environment/SetEnvironmentVariable ""CLOJURE_LOAD_PATH"" new-path)
-        new-path))
-
-(defn append-load-path [new-path]
-    (set-load-path (conj (get-load-path) new-path)))
-
-(defmacro with-out-strs [x]
-    `(System.Text.RegularExpressions.Regex/Split (with-out-str ~x) ""\n""))
-
-(defmacro source [x]
-    `(with-out-strs (r/source ~x)))
-
-(defmacro doc [x]
-    `(with-out-strs (r/doc ~x)))
-
-(defmacro pprint [x]
-    `(with-out-strs (clojure.pprint/pprint ~x)))
-
-(defmacro time-str [x]
-    `(with-out-strs (time ~x)))
-";
+                String clojureSrc = (String)slurp.invoke(assembly.GetManifestResourceStream("Excel_REPL.excel-repl.clj"));
                 Object[,] o = (Object[,]) my_eval(clojureSrc, "clojure.core");
-                
+
                 msg = (String)o[0, 0];
             }
             catch (Exception e)
@@ -108,6 +70,7 @@ namespace ClojureExcel
         }
         private static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
         private static IFn is_nil = clojure.clr.api.Clojure.var("clojure.core", "nil?");
+        private static IFn slurp = clojure.clr.api.Clojure.var("clojure.core", "slurp");
         private static string msg;
 
         //this section is dummy stuff to make sure things load correctly
@@ -117,7 +80,7 @@ namespace ClojureExcel
         {
             if ((bool)is_nil.invoke(o))
             {
-                return "nil";
+                return "";
             }
             if (o is Ratio)
             {
@@ -214,7 +177,10 @@ nrepl/response-values))
             Object o;
             try
             {
-                input = String.Format("(ns {0})\n", sheetName) + input;
+                if (!input.StartsWith("(ns"))
+                {
+                    input = String.Format("(ns {0})\n", sheetName) + input;
+                }
                 o = load_string.invoke(input);
             }
             catch (Exception e)
@@ -228,9 +194,9 @@ nrepl/response-values))
         {
             if ((bool) (is_nil.invoke(o)))
             {
-                return pack("nil");
+                return pack("");
             }
-            
+
             if (o is IPersistentCollection) {
                 o = ((IPersistentCollection)o).seq();
             }
@@ -255,6 +221,7 @@ nrepl/response-values))
         private static String stringify(object o)
         {
             String s = o.GetType().Name;
+
             switch (s)
             {
                 case "String":
@@ -327,7 +294,7 @@ nrepl/response-values))
                     {
                         for (int j = 0; j < n; j++)
                         {
-                            oot[i, j] = "nil";
+                            oot[i, j] = "";
                         }
                     }
                     else
@@ -342,7 +309,7 @@ nrepl/response-values))
                             }
                             for (int j = o4.Length; j < n; j++)
                             {
-                                oot[i, j] = "nil";
+                                oot[i, j] = "";
                             }
                         }
                         else
@@ -350,7 +317,7 @@ nrepl/response-values))
                             oot[i, 0] = o3;
                             for (int j = 1; j < n; j++)
                             {
-                                oot[i, j] = "nil";
+                                oot[i, j] = "";
                             }
                         }
                     }
@@ -361,9 +328,9 @@ nrepl/response-values))
             {
                 var oot = new object[2, 2];
                 oot[0, 0] = o;
-                oot[0, 1] = "nil";
-                oot[1, 0] = "nil";
-                oot[1, 1] = "nil";
+                oot[0, 1] = "";
+                oot[1, 0] = "";
+                oot[1, 1] = "";
                 return oot;
             }
         }
