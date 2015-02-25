@@ -24,6 +24,8 @@ namespace ClojureExcel
             try
             {
                 var assembly = Assembly.GetExecutingAssembly();
+                //NetOffice.ExcelApi.Range r = null;
+                
 
                 var resourceName = "Excel_REPL.nrepl.zip";
                 Stream stream = assembly.GetManifestResourceStream(resourceName);
