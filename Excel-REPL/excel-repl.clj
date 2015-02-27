@@ -8,6 +8,7 @@
 (require '[clojure.repl :as r])
 (require 'clojure.pprint)
 (require 'clojure.walk)
+(require '[clojure.string :as string])
 
 (defn get-cd
   "returns current directory as a string"
@@ -59,10 +60,49 @@
   [x]
   `(with-out-strs (time ~x)))
 
+;;process output
+(def letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+(def letter->val (util/reduce-map (map-indexed (fn [i s] [s i]) letters)))
+
+(defn letter->val2 [[s t :as ss]]
+  (if t
+    (apply + 26
+           (map *
+                (map letter->val (reverse ss))
+                (map #(Math/Pow 26 %) (range))))
+    (letter->val s)))
+
+(defn letter->val3 [s]
+  (letter->val2 (re-find #"[A-Z]+" s)))
+
+(defn selection-width [select-str]
+  (inc (apply - (map letter->val3 (string/split select-str ":")))))
+
+(defn transpose [arr]
+  (let [n (count (first arr))]
+    (for [j (range n)]
+      (map #(nth % j) arr))))
+
+(defn partition-range [values select-str]
+  (let [
+        selection-width (selection-width select-str)
+        ]
+    (if (= 1 selection-width)
+      values
+      (let [
+            m (partition selection-width values)
+            ]
+        (if (.EndsWith select-str "'")
+          (transpose m)
+          m)))))
+
 (defn range-values
   "returns row-wise seq of values selected by select-str"
   [app select-str]
-  (let [range (.Range app select-str)]
+  (let [
+        select-str2 (.Replace select-str "'" "")
+        range (.Range app select-str2)
+        ]
     (if (.Contains select-str ":")
       (mapv #(.Value %) range)
       (.Value range))))
@@ -73,7 +113,7 @@
 
 (defmacro with-excel-refs
   "Expands excel references of the form A1 A2:B6 or Sheet3!A3 etc.
-   References must be symbols.  External references not supported."
+  References must be symbols.  External references not supported."
   [x]
   (let [
         app (Application/GetActiveInstance)

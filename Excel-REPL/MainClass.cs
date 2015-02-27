@@ -24,8 +24,6 @@ namespace ClojureExcel
             try
             {
                 var assembly = Assembly.GetExecutingAssembly();
-                //NetOffice.ExcelApi.Range r = null;
-                
 
                 var resourceName = "Excel_REPL.nrepl.zip";
                 Stream stream = assembly.GetManifestResourceStream(resourceName);
@@ -375,6 +373,20 @@ nrepl/response-values))
 
             return my_eval(input.ToString());
 
+        }
+        [ExcelFunction(Description = "")]
+        public static Object RLoad(Object[] name)
+        {
+            StringBuilder input = new StringBuilder();
+            foreach (Object s in name)
+            {
+                if (s.GetType() != typeof(ExcelEmpty))
+                {
+                    input.Append(s + "\n");
+                }
+            }
+
+            return remote_eval(input.ToString());
         }
         [ExcelFunction(Description = "")]
         public static Object Invoke1(String f, Object[] a0)
