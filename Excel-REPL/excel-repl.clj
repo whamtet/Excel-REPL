@@ -1,7 +1,6 @@
 ;no ns.  this will be evaluated in clojure.core for simplicity
 
 (import System.Environment)
-(import System.Text.RegularExpressions.Regex)
 (import System.IO.Directory)
 (import NetOffice.ExcelApi.Application)
 
@@ -21,7 +20,7 @@
   (Directory/SetCurrentDirectory new-d))
 
 (defn get-load-path []
-  (set (Regex/Split (Environment/GetEnvironmentVariable "CLOJURE_LOAD_PATH") ";")))
+  (set (string/split (Environment/GetEnvironmentVariable "CLOJURE_LOAD_PATH") #";")))
 
 (defn set-load-path [s]
   (let [
@@ -38,7 +37,7 @@
 (defmacro with-out-strs
   "evaluates expression and returns list of lines printed"
   [x]
-  `(System.Text.RegularExpressions.Regex/Split (with-out-str ~x) "\n"))
+  `(string/split (with-out-str ~x) #"\n"))
 
 (defmacro source
   "function source returned as string"
@@ -60,11 +59,16 @@
   [x]
   `(with-out-strs (time ~x)))
 
-;;process output
+;;can we split the ns like this!!??
+(ns sheet
+  (:require [clojure.string :as string]))
+
 (def letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 (def letter->val (util/reduce-map (map-indexed (fn [i s] [s i]) letters)))
 
-(defn letter->val2 [[s t :as ss]]
+(defn letter->val2
+  "column number of excel coumn A, AZ etc"
+  [[s t :as ss]]
   (if t
     (apply + 26
            (map *
@@ -72,39 +76,52 @@
                 (map #(Math/Pow 26 %) (range))))
     (letter->val s)))
 
-(defn letter->val3 [s]
+(defn letter->val3
+  "column number of reference in form A4 etc"
+  [s]
   (letter->val2 (re-find #"[A-Z]+" s)))
 
-(defn selection-width [select-str]
-  (inc (apply - (map letter->val3 (string/split select-str ":")))))
+(defn selection-width
+  "selection width of reference in form A1:B2"
+  [select-str]
+  (let [
+        [a b] (string/split select-str #"!")
+        select-str (or b a)
+        ]
+    (inc (apply - (map letter->val3 (string/split select-str #":"))))))
 
-(defn transpose [arr]
+(defn transpose
+  "transpose 2d array"
+  [arr]
   (let [n (count (first arr))]
-    (for [j (range n)]
-      (map #(nth % j) arr))))
+    (vec
+     (for [j (range n)]
+       (mapv #(nth % j) arr)))))
 
-(defn partition-range [values select-str]
+(defn partition-range
+  "processes values into 2d array if necessary"
+  [values select-str]
   (let [
         selection-width (selection-width select-str)
         ]
     (if (= 1 selection-width)
-      values
+      (vec values)
       (let [
             m (partition selection-width values)
             ]
         (if (.EndsWith select-str "'")
           (transpose m)
-          m)))))
+          (mapv vec m))))))
 
 (defn range-values
-  "returns row-wise seq of values selected by select-str"
+  "Returns array of values selected by select-str."
   [app select-str]
   (let [
         select-str2 (.Replace select-str "'" "")
         range (.Range app select-str2)
         ]
     (if (.Contains select-str ":")
-      (mapv #(.Value %) range)
+      (partition-range (map #(.Value %) range) select-str)
       (.Value range))))
 
 (defn excel-reference? [ref]
@@ -113,7 +130,11 @@
 
 (defmacro with-excel-refs
   "Expands excel references of the form A1 A2:B6 or Sheet3!A3 etc.
-  References must be symbols.  External references not supported."
+  References must be symbols.  External references are not supported.
+
+  Two dimensional references are returned as row wise arrays.  To transpose
+  append with a dash e.g. A2:B4'
+  "
   [x]
   (let [
         app (Application/GetActiveInstance)
