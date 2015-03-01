@@ -13,26 +13,29 @@ using NetOffice.ExcelApi;
 using System.Collections.Concurrent;
 using System.Web;
 using System.IO.Compression;
+using System.Net;
 
 namespace ClojureExcel
 {
     public static class MainClass
     {
-
+        
         static MainClass()
         {
             try
             {
-                var assembly = Assembly.GetExecutingAssembly();
 
+                var assembly = Assembly.GetExecutingAssembly();
+                
                 var resourceName = "Excel_REPL.nrepl.zip";
                 Stream stream = assembly.GetManifestResourceStream(resourceName);
                 ZipFile f = ZipFile.Read(stream);
 
                 string tempPath = System.IO.Path.GetTempPath();
-                string tempFolder = tempPath + "\\Excel_REPL";
+                string tempFolder = tempPath + "Excel_REPL\\";
                 f.ExtractAll(tempFolder, ExtractExistingFileAction.OverwriteSilently);
                 stream.Close();
+                tempFolder += "nrepl\\";
                 appendLoadPath(tempFolder);
 
                 String clojureSrc = (String)slurp.invoke(assembly.GetManifestResourceStream("Excel_REPL.excel-repl.clj"));
@@ -46,13 +49,9 @@ namespace ClojureExcel
             }
 
         }
-        public static BlockingCollection<Object> getCollection()
+        public static BlockingCollection<Object> GetCollection()
         {
             return new BlockingCollection<Object>();
-        }
-        public static HttpUtility getUtility()
-        {
-            return new HttpUtility();
         }
         public static String appendLoadPath(String newPath)
         {
@@ -129,6 +128,7 @@ namespace ClojureExcel
         {
             string input = @"
 (require '[clojure.tools.nrepl :as nrepl])
+(require '[clojure.data.drawbridge-client :as drawbridge-client])
 
 (def conn (nrepl/url-connect ""{0}""))
 (def client (nrepl/client conn 10000))
@@ -153,8 +153,8 @@ nrepl/response-values))
                 {
                   connect_str = String.Format("nrepl://localhost:{0}", connect_info);
                 }
-                my_eval(String.Format(input, connect_str), "client");
-                return connect_str;
+                Object s = my_eval(String.Format(input, connect_str), "client");
+                return s;
             }
             catch (Exception e)
             {
@@ -347,9 +347,11 @@ nrepl/response-values))
         {
             try
             {
-                ExcelExamplesCS45.Example01 e = new ExcelExamplesCS45.Example01();
-                e.RunExample();
-                return "done";
+                BlockingCollection<Object> c = new BlockingCollection<object>();
+                c.Add("hihi");
+                Object outObj;
+                c.TryTake(out outObj, 0);
+                return outObj;
             }
             catch (Exception e)
             {
@@ -357,6 +359,12 @@ nrepl/response-values))
             }
         }
 
+        public static Object TakeItem(BlockingCollection<Object> c)
+        {
+            Object outObj;
+            c.TryTake(out outObj, 0);
+            return outObj;
+        }
 
         [ExcelFunction(Description = "My first .NET function")]
         public static object Load(Object[] name)

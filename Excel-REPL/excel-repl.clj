@@ -6,8 +6,8 @@
 
 (require '[clojure.repl :as r])
 (require 'clojure.pprint)
-(require 'clojure.walk)
 (require '[clojure.string :as string])
+(require 'clojure.walk)
 
 (defn get-cd
   "returns current directory as a string"
@@ -34,10 +34,13 @@
   [new-path]
   (set-load-path (conj (get-load-path) new-path)))
 
+(defn split-lines [s]
+  (string/split s #"\n"))
+
 (defmacro with-out-strs
   "evaluates expression and returns list of lines printed"
   [x]
-  `(string/split (with-out-str ~x) #"\n"))
+  `(split-lines (with-out-str ~x)))
 
 (defmacro source
   "function source returned as string"
@@ -59,12 +62,10 @@
   [x]
   `(with-out-strs (time ~x)))
 
-;;can we split the ns like this!!??
-(ns sheet
-  (:require [clojure.string :as string]))
+;;otha stuff
 
 (def letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-(def letter->val (util/reduce-map (map-indexed (fn [i s] [s i]) letters)))
+(def letter->val (into {} (map-indexed (fn [i s] [s i]) letters)))
 
 (defn letter->val2
   "column number of excel coumn A, AZ etc"
@@ -88,7 +89,7 @@
         [a b] (string/split select-str #"!")
         select-str (or b a)
         ]
-    (inc (apply - (map letter->val3 (string/split select-str #":"))))))
+    (inc (Math/Abs (apply - (map letter->val3 (string/split select-str #":")))))))
 
 (defn transpose
   "transpose 2d array"
@@ -122,6 +123,7 @@
         ]
     (if (.Contains select-str ":")
       (partition-range (map #(.Value %) range) select-str)
+      ;(mapv #(.Value %) range)
       (.Value range))))
 
 (defn excel-reference? [ref]
