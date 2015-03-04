@@ -334,7 +334,7 @@ nrepl/response-values))
                 return oot;
             }
         }
-        private static String getSheetName()
+        public static String getSheetName()
         {
             ExcelReference reference = (ExcelReference)XlCall.Excel(XlCall.xlfCaller);
             string sheetName = (string)XlCall.Excel(XlCall.xlSheetNm, reference);
@@ -345,18 +345,7 @@ nrepl/response-values))
         [ExcelFunction(Description="hihi")]
         public static Object Test()
         {
-            try
-            {
-                BlockingCollection<Object> c = new BlockingCollection<object>();
-                c.Add("hihi");
-                Object outObj;
-                c.TryTake(out outObj, 0);
-                return outObj;
-            }
-            catch (Exception e)
-            {
-                return e.ToString();
-            }
+            return null;
         }
 
         public static Object TakeItem(BlockingCollection<Object> c)
