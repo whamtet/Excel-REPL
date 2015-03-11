@@ -25,10 +25,9 @@ Concatenates the contents of selected cells and evaluates them in namespace Shee
 (defn ^:export h [single-cell-argument [excel-array-argument]] ...)
 ```
 
-Hit Ctrl Shift C to expose functions with export metadata as Excel User Defined Functions.  Functions with a single arglist are simply exposed as their name.  Multiarity functions include the arity.  In the example above f will expose F and G will expose G0 and G1.
+Hit Ctrl Shift C to expose functions with `^:export` metadata as Excel User Defined Functions.  Functions with a single arglist are simply exposed as their name.  Multiarity functions include the arity.  In the example above f will expose F and G will expose G0 and G1.
 
 Excel REPL assumes all arguments are passed as single cell selections (A1, B6 etc).  To indicate that an argument should be an array selection declare that argument with vector destructuring.
-
 ##Returning 1D and 2D arrays
 
 If your function returns a 1 or 2 dimensional collection you may paste it into a range of Excel Cells.  To do so
