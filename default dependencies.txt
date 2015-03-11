@@ -27,3 +27,4 @@ ExcelApi
 Misc
 ====
 System.Drawing
+System.Windows.Forms

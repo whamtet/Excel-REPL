@@ -2,7 +2,7 @@
 
 (import System.Environment)
 (import System.IO.Directory)
-(import NetOffice.ExcelApi.Application)
+;(import NetOffice.ExcelApi.Application)
 
 (require '[clojure.repl :as r])
 (require 'clojure.pprint)
@@ -130,7 +130,7 @@
   (if (symbol? ref)
     (re-find #"[A-Z]+[0-9]+" (str ref))))
 
-(defmacro with-excel-refs
+#_(defmacro with-excel-refs
   "Expands excel references of the form A1 A2:B6 or Sheet3!A3 etc.
   References must be symbols.  External references are not supported.
 

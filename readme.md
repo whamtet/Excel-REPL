@@ -15,31 +15,19 @@ As much as we all love VBA there are better languages available such as ... Cloj
 
 Concatenates the contents of selected cells and evaluates them in namespace SheetName.  SheetName is the name of the current worksheet.
 
-##Invoke
+##Expose
 
-    =Invoke1("myFunction", A1)
-    =Invoke2("myFunction", A2:A5, C6)
-    ...
+```clojure
+(defn ^:export f [] ...)
 
-Invokes myFunction with the supplied arguments and returns the result.  Range arguments are provided as a Clojure vector unless the range is of length one, in which case they are the same as a single cell argument.
+(defn ^:export g ([] "No Args") ([x] "One Arg"))
 
-Arity cannot be overloaded so you must use Invoke1, Invoke2 etc.  For functions with zero arguments simply use Load.
+(defn ^:export h [single-cell-argument [excel-array-argument]] ...)
+```
 
-##RInvoke and RLoad
+Hit Ctrl Shift C to expose functions with export metadata as Excel User Defined Functions.  Functions with a single arglist are simply exposed as their name.  Multiarity functions include the arity.  In the example above f will expose F and G will expose G0 and G1.
 
-    =RInvoke1("myFunction", A1)
-    =RInvoke2("myFunction", A2:A5, C6)
-    =RLoad("(+ 1 2)")
-    ...
-
-The same as Invoke and Load but evaluated on a remote nrepl instance.  To define the remote address first invoke
-
-    =DefineClient("nrepl://host:port")
-
-Nrepl connections are also supported over http with the help of [Drawbridge](https://github.com/cemerick/drawbridge).  Add the drawbridge server handler from this project and Excel REPL will take care of the client side.
-
-    =DefineClient("http://some.server/drawbridge-nrepl-handler")
-
+Excel REPL assumes all arguments are passed as single cell selections (A1, B6 etc).  To indicate that an argument should be an array selection declare that argument with vector destructuring.
 
 ##Returning 1D and 2D arrays
 

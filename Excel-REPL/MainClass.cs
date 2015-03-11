@@ -14,19 +14,116 @@ using System.Collections.Concurrent;
 using System.Web;
 using System.IO.Compression;
 using System.Net;
+using System.Reflection.Emit;
+using ExcelDna.CustomRegistration;
+using System.Linq.Expressions;
+using System.Windows.Forms;
+using System.CodeDom.Compiler;
+using Microsoft.CSharp;
 
 namespace ClojureExcel
 {
-    public static class MainClass
+    public class MainClass : IExcelAddIn
     {
-        
-        static MainClass()
+        public void AutoClose() { }
+        public void AutoOpen()
+        {
+            dynamic xlApp = ExcelDnaUtil.Application;
+            xlApp.OnKey("^+c", "OOG");
+            Init();
+            //MessageBox.Show("Loading");
+        }
+        public static Type toRegister;
+        public static String code;
+
+        public static void OOG()
         {
             try
             {
+                String code = String.Format("(compile-ns '{0})", latestSheetName);
+                my_eval(code, "udf");
+                MessageBox.Show("Exposed " + latestSheetName);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
 
+        public static Object AssemblyPaths()
+        {
+            var assemblies = AppDomain.CurrentDomain
+                            .GetAssemblies()
+                            .Where(a => !a.IsDynamic)
+                            .Select(a => a.Location);
+            return assemblies;
+        }
+
+        public static void RegisterMethods(MethodInfo[] methods)
+        {
+            List<MethodInfo> l = new List<MethodInfo>();
+            foreach (MethodInfo info in methods)
+            {
+                l.Add(info);
+            }
+            Integration.RegisterMethods(l);
+        }
+
+        private static void ExposeClass(String code)
+        {
+            try
+            {
+                CompilerParameters cp = new CompilerParameters();
+                cp.GenerateExecutable = false;
+                cp.GenerateInMemory = true;
+                cp.TreatWarningsAsErrors = false;
+                cp.ReferencedAssemblies.Add("System.dll"); //, "System.Windows.Forms.dll", "ExcelDna.Integration.dll" );
+                cp.ReferencedAssemblies.Add("Clojure.dll");
+                cp.ReferencedAssemblies.Add("ExcelDna.Integration.dll");
+                CSharpCodeProvider provider = new CSharpCodeProvider();
+                CompilerResults cr = provider.CompileAssemblyFromSource(cp, new string[] { code });
+                if (!cr.Errors.HasErrors)
+                {
+                    Assembly asm = cr.CompiledAssembly;
+                    Type outType = asm.GetTypes()[0];
+                    List<MethodInfo> methods = new List<MethodInfo>();
+
+                    foreach (MethodInfo info in outType.GetMethods(BindingFlags.Public | BindingFlags.Static))
+                    {
+                        methods.Add(info);
+                    }
+                    //MessageBox.Show(type.ToString());
+
+                    Integration.RegisterMethods(methods);
+                    dynamic instance = Activator.CreateInstance(outType, new Object[] { load_string });
+                }
+                else
+                {
+                    MessageBox.Show(cr.Errors.ToString());
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
+
+        private static void RegisterType(Type t)
+        {
+            List<MethodInfo> methods = new List<MethodInfo>();
+            foreach (MethodInfo info in t.GetMethods(BindingFlags.Public | BindingFlags.Static))
+            {
+                methods.Add(info);
+            }
+            Integration.RegisterMethods(methods);
+        }
+
+        private static void Init()
+        {
+            try
+            {
                 var assembly = Assembly.GetExecutingAssembly();
-                
+
                 var resourceName = "Excel_REPL.nrepl.zip";
                 Stream stream = assembly.GetManifestResourceStream(resourceName);
                 ZipFile f = ZipFile.Read(stream);
@@ -38,16 +135,22 @@ namespace ClojureExcel
                 tempFolder += "nrepl\\";
                 appendLoadPath(tempFolder);
 
-                String clojureSrc = (String)slurp.invoke(assembly.GetManifestResourceStream("Excel_REPL.excel-repl.clj"));
-                Object[,] o = (Object[,]) my_eval(clojureSrc, "clojure.core");
+                String clojureSrc = ResourceSlurp("excel-repl.clj");
+                my_eval(clojureSrc, "clojure.core");
+                Object[,] o = (Object[,])my_eval(ResourceSlurp("udf.clj"), "udf");
 
                 msg = (String)o[0, 0];
+
+
             }
             catch (Exception e)
             {
                 msg = e.ToString();
             }
-
+        }
+        public static String ResourceSlurp(String resource)
+        {
+            return (String)slurp.invoke(Assembly.GetExecutingAssembly().GetManifestResourceStream("Excel_REPL." + resource));
         }
         public static BlockingCollection<Object> GetCollection()
         {
@@ -70,10 +173,10 @@ namespace ClojureExcel
         private static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
         private static IFn is_nil = clojure.clr.api.Clojure.var("clojure.core", "nil?");
         private static IFn slurp = clojure.clr.api.Clojure.var("clojure.core", "slurp");
+        private static IFn reset_BANG_ = clojure.clr.api.Clojure.var("clojure.core", "reset!");
+        private static String latestSheetName;
         private static string msg;
 
-        //this section is dummy stuff to make sure things load correctly
-        public static Application a = Application.GetActiveInstance();
 
         private static Object doublize(object o)
         {
@@ -97,7 +200,8 @@ namespace ClojureExcel
 
         private static object seqize(Object o)
         {
-            if (o is IPersistentCollection) {
+            if (o is IPersistentCollection)
+            {
                 o = ((IPersistentCollection)o).seq();
             }
             if (o is ISeq)
@@ -118,12 +222,10 @@ namespace ClojureExcel
                 return doublize(o);
             }
         }
-        [ExcelFunction]
         public static String GetMsg()
         {
             return msg;
         }
-        [ExcelFunction(Description = "define client")]
         public static Object DefineClient(Object connect_info)
         {
             string input = @"
@@ -147,11 +249,11 @@ nrepl/response-values))
                 String connect_str;
                 if (connect_info is String)
                 {
-                  connect_str = (String) connect_info;
+                    connect_str = (String)connect_info;
                 }
                 else
                 {
-                  connect_str = String.Format("nrepl://localhost:{0}", connect_info);
+                    connect_str = String.Format("nrepl://localhost:{0}", connect_info);
                 }
                 Object s = my_eval(String.Format(input, connect_str), "client");
                 return s;
@@ -192,12 +294,13 @@ nrepl/response-values))
 
         private static Object process_output(Object o)
         {
-            if ((bool) (is_nil.invoke(o)))
+            if ((bool)(is_nil.invoke(o)))
             {
                 return pack("");
             }
 
-            if (o is IPersistentCollection) {
+            if (o is IPersistentCollection)
+            {
                 o = ((IPersistentCollection)o).seq();
             }
             if (o is ISeq)
@@ -205,7 +308,8 @@ nrepl/response-values))
                 ISeq r2 = (ISeq)o;
                 object[] outArr = new object[r2.count()];
                 int i = 0;
-                while (r2 != null) {
+                while (r2 != null)
+                {
                     outArr[i] = seqize(r2.first());
                     i++;
                     r2 = r2.next();
@@ -263,13 +367,12 @@ nrepl/response-values))
             }
             return sb.ToString();
         }
-
-        [ExcelFunction(Description = "Get Version")]
         public static String GetVersion()
         {
             return "0.0.1";
         }
-        private static object pack(object o) {
+        private static object pack(object o)
+        {
             if (o is object[])
             {
                 object[] o2 = (object[])o;
@@ -340,12 +443,26 @@ nrepl/response-values))
             string sheetName = (string)XlCall.Excel(XlCall.xlSheetNm, reference);
             sheetName = Regex.Split(sheetName, "\\]")[1];
             sheetName = sheetName.Replace(" ", "");
+            latestSheetName = sheetName;
             return sheetName;
         }
-        [ExcelFunction(Description="hihi")]
-        public static Object Test()
+        public static object Test()
         {
-            return null;
+            object[,] values = new object[2, 2];
+            values[0, 0] = 1;
+            values[0, 1] = 2;
+            values[1, 0] = 3;
+            values[1, 1] = 4;
+
+            return values;
+
+        }
+
+        public static List<MethodInfo> MakeList(MethodInfo i)
+        {
+            List<MethodInfo> oot = new List<MethodInfo>();
+            oot.Add(i);
+            return oot;
         }
 
         public static Object TakeItem(BlockingCollection<Object> c)
@@ -354,8 +471,6 @@ nrepl/response-values))
             c.TryTake(out outObj, 0);
             return outObj;
         }
-
-        [ExcelFunction(Description = "My first .NET function")]
         public static object Load(Object[] name)
         {
 
@@ -371,7 +486,6 @@ nrepl/response-values))
             return my_eval(input.ToString());
 
         }
-        [ExcelFunction(Description = "")]
         public static Object RLoad(Object[] name)
         {
             StringBuilder input = new StringBuilder();
@@ -385,110 +499,91 @@ nrepl/response-values))
 
             return remote_eval(input.ToString());
         }
-        [ExcelFunction(Description = "")]
         public static Object Invoke1(String f, Object[] a0)
         {
             String s = "(" + f + " " + stringifies2(a0) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object Invoke2(String f, Object[] a0, Object[] a1)
         {
             String s = "(" + f + " " + stringifies2(a0, a1) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object Invoke3(String f, Object[] a0, Object[] a1, Object[] a2)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object Invoke4(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object Invoke5(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object Invoke6(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object Invoke7(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5, Object[] a6)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5, a6) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object Invoke8(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5, Object[] a6, Object[] a7)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5, a6, a7) + ")";
             return my_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object Invoke9(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5, Object[] a6, Object[] a7, Object[] a8)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5, a6, a7, a8) + ")";
             return my_eval(s);
         }
-
-        [ExcelFunction(Description = "")]
         public static Object RInvoke1(String f, Object[] a0)
         {
             String s = "(" + f + " " + stringifies2(a0) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object RInvoke2(String f, Object[] a0, Object[] a1)
         {
             String s = "(" + f + " " + stringifies2(a0, a1) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object RInvoke3(String f, Object[] a0, Object[] a1, Object[] a2)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object RInvoke4(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object RInvoke5(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object RInvoke6(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object RInvoke7(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5, Object[] a6)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5, a6) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object RInvoke8(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5, Object[] a6, Object[] a7)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5, a6, a7) + ")";
             return remote_eval(s);
         }
-        [ExcelFunction(Description = "")]
         public static Object RInvoke9(String f, Object[] a0, Object[] a1, Object[] a2, Object[] a3, Object[] a4, Object[] a5, Object[] a6, Object[] a7, Object[] a8)
         {
             String s = "(" + f + " " + stringifies2(a0, a1, a2, a3, a4, a5, a6, a7, a8) + ")";
