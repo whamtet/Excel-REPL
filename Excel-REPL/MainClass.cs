@@ -137,6 +137,7 @@ namespace ClojureExcel
 
                 String clojureSrc = ResourceSlurp("excel-repl.clj");
                 my_eval(clojureSrc, "clojure.core");
+                my_eval(ResourceSlurp("client.clj"), "client");
                 Object[,] o = (Object[,])my_eval(ResourceSlurp("udf.clj"), "udf");
 
                 msg = (String)o[0, 0];
