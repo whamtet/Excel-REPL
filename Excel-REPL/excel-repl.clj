@@ -2,13 +2,13 @@
 
 (import System.Environment)
 (import System.IO.Directory)
-;(import NetOffice.ExcelApi.Application)
+(require 'excel-repl.udf)
+(import NetOffice.ExcelApi.Application)
 
 (require '[clojure.repl :as r])
 (require 'clojure.pprint)
 (require '[clojure.string :as string])
 (require 'clojure.walk)
-(require 'excel-repl.udf)
 
 (defn get-cd
   "returns current directory as a string"
@@ -148,5 +148,6 @@
     (clojure.walk/prewalk f x)))
 
 (defmacro run-as-macro [s]
-  `(let [app# (Application/GetActiveInstance)]
+  `(let [app# (NetOffice.ExcelApi.Application/GetActiveInstance)]
+     (excel-repl.udf/export-fns)
      (.Run app# ~(excel-repl.udf/clean-str s))))

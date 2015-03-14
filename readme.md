@@ -39,12 +39,7 @@ Excel's object model bans us from directly manipulating the workbook with Excel-
 ```clojure
 (defn ^:export manipulate-workbook [] ...) ;no arguments allowed!!!
 
-(require 'excel-repl.udf)
-(excel-repl.udf/export-fns)
-
-;manipulate-workbook is exported so we can safely invoke workbook manipulating code
-
-(run-as-macro manipulate-workbook)
+(run-as-macro manipulate-workbook) ;invokes manipulate-workbook within an Excel Macro so that you can set cell values
 ```
 
 Excel repl provides a nice lispy wrapper around the c api used to get and set values.
