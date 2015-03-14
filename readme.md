@@ -32,6 +32,25 @@ Concatenates the contents of selected cells and evaluates them in namespace Shee
 
 Excel REPL assumes all arguments are passed as single cell selections (A1, B6 etc).  To indicate that an argument should be an array selection declare that argument with vector destructuring.
 
+##Manipulate
+
+Excel's object model bans us from directly manipulating the workbook with Excel-REPL.  Of course that's half the reason we want a repl in the first place.  What to do?  Export your workbook manipulating code in a function with NO arguments and then invoke it via `run-as-macro`.  Under the covers Excel-REPL creates an Excel (not Clojure) macro and invokes it.  From here you can do what you want with the invoking workbook.  Make sure your source code doesn't delete itself!
+
+```clojure
+(defn ^:export manipulate-workbook [] ...) ;no arguments allowed!!!
+
+(require 'excel-repl.udf)
+(excel-repl.udf/export-fns)
+
+;manipulate-workbook is exported so we can safely invoke workbook manipulating code
+
+(run-as-macro manipulate-workbook)
+```
+
+Excel repl provides a nice lispy wrapper around the c api used to get and set values.
+
+
+
 ##Returning 1D and 2D arrays
 
 If your function returns a 1 or 2 dimensional collection you may paste it into a range of Excel Cells.  To do so

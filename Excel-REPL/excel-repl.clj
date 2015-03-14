@@ -8,6 +8,7 @@
 (require 'clojure.pprint)
 (require '[clojure.string :as string])
 (require 'clojure.walk)
+(require 'excel-repl.udf)
 
 (defn get-cd
   "returns current directory as a string"
@@ -145,3 +146,7 @@
              %)
         ]
     (clojure.walk/prewalk f x)))
+
+(defmacro run-as-macro [s]
+  `(let [app# (Application/GetActiveInstance)]
+     (.Run app# ~(excel-repl.udf/clean-str s))))
