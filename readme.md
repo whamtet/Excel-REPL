@@ -34,17 +34,11 @@ Excel REPL assumes all arguments are passed as single cell selections (A1, B6 et
 
 ##Manipulate
 
-Excel's object model bans us from directly manipulating the workbook with Excel-REPL.  Of course that's half the reason we want a repl in the first place.  What to do?  Export your workbook manipulating code in a function with NO arguments and then invoke it via `run-as-macro`.  Under the covers Excel-REPL creates an Excel (not Clojure) macro and invokes it.  From here you can do what you want with the invoking workbook.  Make sure your source code doesn't delete itself!
+Excel REPL makes it easy to dynamically manipulate the current worksheet.  Use the `in-macro-context` so that the code is evaluated inside an anonymous (Excel) macro.  Setting cell values outside this will throw an exception.
 
 ```clojure
-(defn ^:export manipulate-workbook [] ...) ;no arguments allowed!!!
-
-(run-as-macro manipulate-workbook)
-;invokes manipulate-workbook within an Excel Macro so that you can set cell values
+(in-macro-context ...)
 ```
-
-Excel repl provides a nice lispy wrapper around the c api used to get and set values.
-
 
 
 ##Returning 1D and 2D arrays

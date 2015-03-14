@@ -435,6 +435,24 @@ nrepl/response-values))
         {
             return "0.0.1";
         }
+
+        public static Object[,] RectangularArray(Object[] input)
+        {
+            int m = input.Length;
+            Object[] firstRow = (Object[])input[0];
+            int n = firstRow.Length;
+            var output = new Object[m, n];
+            for (var i = 0; i < m; i++)
+            {
+                Object[] row = (Object[])input[i];
+                for (var j = 0; j < n; j++)
+                {
+                    output[i, j] = row[j];
+                }
+            }
+            
+            return output;
+        }
         private static object pack(object o)
         {
             if (o is object[])

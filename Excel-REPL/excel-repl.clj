@@ -132,22 +132,23 @@
     (re-find #"[A-Z]+[0-9]+" (str ref))))
 
 #_(defmacro with-excel-refs
-  "Expands excel references of the form A1 A2:B6 or Sheet3!A3 etc.
-  References must be symbols.  External references are not supported.
+    "Expands excel references of the form A1 A2:B6 or Sheet3!A3 etc.
+    References must be symbols.  External references are not supported.
 
-  Two dimensional references are returned as row wise arrays.  To transpose
-  append with a dash e.g. A2:B4'
-  "
-  [x]
-  (let [
-        app (Application/GetActiveInstance)
-        f #(if (excel-reference? %)
-             (range-values app (str %))
-             %)
-        ]
-    (clojure.walk/prewalk f x)))
+    Two dimensional references are returned as row wise arrays.  To transpose
+    append with a dash e.g. A2:B4'
+    "
+    [x]
+    (let [
+          app (Application/GetActiveInstance)
+          f #(if (excel-reference? %)
+               (range-values app (str %))
+               %)
+          ]
+      (clojure.walk/prewalk f x)))
 
-(defmacro run-as-macro [s]
-  `(let [app# (NetOffice.ExcelApi.Application/GetActiveInstance)]
+(defmacro in-macro-context [& body]
+  `(do
+     (defn ^:export f# [] ~@body)
      (excel-repl.udf/export-fns)
-     (.Run app# ~(excel-repl.udf/clean-str s))))
+     (.Run (NetOffice.ExcelApi.Application/GetActiveInstance) (excel-repl.udf/clean-str 'f#))))
