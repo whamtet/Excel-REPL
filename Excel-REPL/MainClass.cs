@@ -28,21 +28,24 @@ namespace ClojureExcel
         public void AutoClose() { }
         public void AutoOpen()
         {
-            dynamic xlApp = ExcelDnaUtil.Application;
-            xlApp.OnKey("^+c", "OOG");
             Init();
-            //MessageBox.Show("Loading");
         }
         public static Type toRegister;
         public static String code;
 
-        public static void OOG()
+        private static Object getFirst(Object o)
+        {
+            return ((Object[,])o)[0, 0];
+        }
+
+        public static void ExportUdfs()
         {
             try
             {
                 String code = String.Format("(compile-ns '{0})", latestSheetName);
-                my_eval(code, "udf");
-                MessageBox.Show("Exposed " + latestSheetName);
+                //MessageBox.Show(getFirst(my_eval(code, "excel-repl.udf")).ToString());
+                //MessageBox.Show("Exposed " + latestSheetName);
+                my_eval(code, "excel-repl.udf");
             }
             catch (Exception e)
             {
@@ -67,6 +70,66 @@ namespace ClojureExcel
                 l.Add(info);
             }
             Integration.RegisterMethods(l);
+        }
+        [ExcelCommand(MenuName = "Matt", MenuText = "f")]
+        public static void f()
+        {
+            my_eval("(f)", "Sheet1");
+        }
+
+        [ExcelCommand(MenuName = "Range Tools", MenuText = "Square Selection")]
+        public static void SquareRange()
+        {
+
+            object[,] result;
+
+            // Get a reference to the current selection
+            ExcelReference selection = (ExcelReference)XlCall.Excel(XlCall.xlfSelection);
+            // Get the value of the selection
+            object selectionContent = selection.GetValue();
+            if (selectionContent is object[,])
+            {
+                object[,] values = (object[,])selectionContent;
+                int rows = values.GetLength(0);
+                int cols = values.GetLength(1);
+                result = new object[rows, cols];
+
+                // Process the values
+                for (int i = 0; i < rows; i++)
+                {
+                    for (int j = 0; j < cols; j++)
+                    {
+                        if (values[i, j] is double)
+                        {
+                            double val = (double)values[i, j];
+                            result[i, j] = val * val;
+                        }
+                        else
+                        {
+                            result[i, j] = values[i, j];
+                        }
+                    }
+                }
+            }
+            else if (selectionContent is double)
+            {
+                double value = (double)selectionContent;
+                result = new object[,] { { value * value } };
+            }
+            else
+            {
+                result = new object[,] { { "Selection was not a range or a number, but " + selectionContent.ToString() } };
+            }
+
+            // Now create the target reference that will refer to Sheet 2, getting a reference that contains the SheetId first
+            ExcelReference sheet2 = (ExcelReference)XlCall.Excel(XlCall.xlSheetId, "Sheet2"); // Throws exception if no Sheet2 exists
+            // ... then creating the reference with the right size as new ExcelReference(RowFirst, RowLast, ColFirst, ColLast, SheetId)
+            int resultRows = result.GetLength(0);
+            int resultCols = result.GetLength(1);
+            ExcelReference target = new ExcelReference(0, resultRows - 1, 0, resultCols - 1, sheet2.SheetId);
+            // Finally setting the result into the target range.
+            target.SetValue(result);
+            MessageBox.Show("Done");
         }
 
         private static void ExposeClass(String code)
@@ -138,9 +201,9 @@ namespace ClojureExcel
                 String clojureSrc = ResourceSlurp("excel-repl.clj");
                 my_eval(clojureSrc, "clojure.core");
                 my_eval(ResourceSlurp("client.clj"), "client");
-                Object[,] o = (Object[,])my_eval(ResourceSlurp("udf.clj"), "udf");
+                //Object[,] o = (Object[,])my_eval(ResourceSlurp("udf.clj"), "udf");
 
-                msg = (String)o[0, 0];
+                //msg = (String)o[0, 0];
 
 
             }

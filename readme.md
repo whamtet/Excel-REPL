@@ -15,7 +15,7 @@ As much as we all love VBA there are better languages available such as ... Cloj
 
 Concatenates the contents of selected cells and evaluates them in namespace SheetName.  SheetName is the name of the current worksheet.
 
-##Expose
+##Export
 
 ```clojure
 (defn ^:export f [] ...)
@@ -23,9 +23,12 @@ Concatenates the contents of selected cells and evaluates them in namespace Shee
 (defn ^:export g ([] "No Args") ([x] "One Arg"))
 
 (defn ^:export h [single-cell-argument [excel-array-argument]] ...)
+
+(require 'excel-repl.udf)
+(excel-repl.udf/export-fns) ;exports the above functions
 ```
 
-Hit Ctrl Shift C to expose functions with `^:export` metadata as Excel User Defined Functions.  Functions with a single arglist are simply exposed as their name.  Multiarity functions include the arity.  In the example above f will expose `=F()` and g will expose `=G0()` and `=G1(x)`.
+`excel-repl.udf/export-fns` will export as Excel user defined functions all functions with `^:export` metadata in the current namespace.  Functions with a single arglist are simply exported as their name.  Multiarity functions include the arity.  In the example above f will export `=F()` and g will export `=G0()` and `=G1(x)`.
 
 Excel REPL assumes all arguments are passed as single cell selections (A1, B6 etc).  To indicate that an argument should be an array selection declare that argument with vector destructuring.
 

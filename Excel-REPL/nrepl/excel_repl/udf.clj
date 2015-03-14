@@ -1,7 +1,13 @@
+(ns excel-repl.udf)
+
 (import System.CodeDom.Compiler.CompilerParameters)
 (import Microsoft.CSharp.CSharpCodeProvider)
 (import System.Reflection.BindingFlags)
 (import ClojureExcel.MainClass)
+
+(assembly-load "ExcelApi")
+(import NetOffice.ExcelApi.Application)
+
 
 (def loaded-classes (MainClass/AssemblyPaths))
 (defn load-path [s] (some #(if (.Contains % s) %) loaded-classes))
@@ -99,3 +105,6 @@
         ]
     (Activator/CreateInstance t constructor-args)
     (MainClass/RegisterMethods (get-methods t))))
+
+(defn export-fns []
+  (.Run (Application/GetActiveInstance) "ExportUdfs"))
