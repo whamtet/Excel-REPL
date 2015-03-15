@@ -1,3 +1,5 @@
+(ns excel-repl.interop)
+
 (import ExcelDna.Integration.ExcelReference)
 (import ClojureExcel.MainClass)
 

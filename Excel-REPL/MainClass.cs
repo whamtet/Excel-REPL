@@ -72,13 +72,12 @@ namespace ClojureExcel
             Integration.RegisterMethods(l);
         }
 
-        [ExcelCommand()]
-        public static void f()
-        {
-            var app = NetOffice.ExcelApi.Application.GetActiveInstance();
-//            app.Selection
-            MessageBox.Show("f");
-        }
+//        [ExcelCommand(MenuName = "f", MenuText = "f")]
+//        public static void f()
+//        {
+//            var app = ExcelDnaUtil.Application as Microsoft.Office.Interop.Excel.Application;
+//            app.Selection.Insert();
+//;        }
         
         private static void RegisterType(Type t)
         {
