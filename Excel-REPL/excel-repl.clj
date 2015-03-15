@@ -149,6 +149,7 @@
 
 (defmacro in-macro-context [& body]
   `(do
-     (defn ^:export f# [] ~@body)
+     (defn ^:excel-macro f#
+       [] ~@body)
      (excel-repl.udf/export-fns)
      (.Run (NetOffice.ExcelApi.Application/GetActiveInstance) (excel-repl.udf/clean-str 'f#))))

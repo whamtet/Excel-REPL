@@ -40,11 +40,11 @@
 
 (defn filter-arglists [v]
   (let [
-        {:keys [name arglists doc export]} (meta v)
+        {:keys [name arglists doc export excel-macro]} (meta v)
         arglists (remove dirty-arglist? arglists)
-;        clean-str2 #(if (vector? %) % (clean-str %))
+        export-type (if export :export :excel-macro)
         ]
-    (if (and (not-empty arglists) export) [(clean-str name) arglists doc (var-get v)])))
+    (if (and (not-empty arglists) (or export excel-macro)) [(clean-str name) arglists doc export-type (var-get v)])))
 
 (defn filter-ns-interns [ns]
   (filter identity (map filter-arglists (vals (ns-interns ns)))))
@@ -52,10 +52,12 @@
 (defn append-replace [s a b]
   (.Replace s a (str a b)))
 
-(defn emit-static-method [method-name name arglist doc]
+(defn emit-static-method [method-name name arglist doc export-type]
   (let [
-
-        doc (format "[ExcelFunction(Description=@\"%s\")]" (or doc ""))
+        doc (if (= :export export-type)
+              (format "[ExcelFunction(Description=@\"%s\")]" (or doc ""))
+              "[ExcelCommand()]")
+        return-type (if (= :export export-type) "object" "void")
         arg-types (map #(if (vector? %) "Object[] " "Object ") arglist)
         clean-args (map #(if (vector? %) (gensym) (clean-str %)) arglist)
         arglist1 (comma-interpose (map str arg-types clean-args))
@@ -68,12 +70,12 @@
             try { return %s.invoke(%s); } catch (Exception e) {return e.ToString();}
             }" doc method-name arglist1 name arglist2)))
 
-(defn emit-static-methods [[name arglists doc]]
+(defn emit-static-methods [[name arglists doc export-type]]
   (let [
         method-names (if (= 1 (count arglists))
                        [(.ToUpper name)]
                        (map #(str (.ToUpper name) (count %)) arglists))]
-    (line-interpose (map #(emit-static-method %1 name %2 doc) method-names arglists))))
+    (line-interpose (map #(emit-static-method %1 name %2 doc export-type) method-names arglists))))
 
 (defn class-str [d]
   (let [
