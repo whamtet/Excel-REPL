@@ -71,6 +71,14 @@ namespace ClojureExcel
             }
             Integration.RegisterMethods(l);
         }
+
+        [ExcelCommand()]
+        public static void f()
+        {
+            var app = NetOffice.ExcelApi.Application.GetActiveInstance();
+//            app.Selection
+            MessageBox.Show("f");
+        }
         
         private static void RegisterType(Type t)
         {
@@ -337,6 +345,27 @@ nrepl/response-values))
         public static String GetVersion()
         {
             return "0.0.1";
+        }
+        public static Object RaggedArray(Object arrayCandidate)
+        {
+            var input = arrayCandidate as Object[,];
+            if (input == null)
+            {
+                return arrayCandidate;
+            }
+            int m = input.GetUpperBound(0) + 1;
+            int n = input.GetUpperBound(1) + 1;
+            Object[][] output = new Object[m][];
+            for (int i = 0; i < m; i++ )
+            {
+                Object[] row = new Object[n];
+                for (int j = 0; j < n; j++)
+                {
+                    row[j] = input[i, j];
+                }
+                output[i] = row;
+            }
+            return output;
         }
 
         public static Object[,] RectangularArray(Object[] input)

@@ -39,7 +39,7 @@ Excel REPL makes it easy to dynamically manipulate the current worksheet.  Use t
 ```clojure
 (in-macro-context ...)
 ```
-
+Please see [interop.clj](https://github.com/whamtet/Excel-REPL/blob/master/Excel-REPL/nrepl/excel_repl/interop.clj) for the functions to manipulate the worksheet.
 
 ##Returning 1D and 2D arrays
 

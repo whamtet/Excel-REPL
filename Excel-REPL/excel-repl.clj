@@ -65,10 +65,10 @@
 
 ;;otha stuff
 
-(def letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-(def letter->val (into {} (map-indexed (fn [i s] [s i]) letters)))
+#_(def letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+#_(def letter->val (into {} (map-indexed (fn [i s] [s i]) letters)))
 
-(defn letter->val2
+#_(defn letter->val2
   "column number of excel coumn A, AZ etc"
   [[s t :as ss]]
   (if t
@@ -78,12 +78,12 @@
                 (map #(Math/Pow 26 %) (range))))
     (letter->val s)))
 
-(defn letter->val3
+#_(defn letter->val3
   "column number of reference in form A4 etc"
   [s]
   (letter->val2 (re-find #"[A-Z]+" s)))
 
-(defn selection-width
+#_(defn selection-width
   "selection width of reference in form A1:B2"
   [select-str]
   (let [
@@ -92,7 +92,7 @@
         ]
     (inc (Math/Abs (apply - (map letter->val3 (string/split select-str #":")))))))
 
-(defn transpose
+#_(defn transpose
   "transpose 2d array"
   [arr]
   (let [n (count (first arr))]
@@ -100,7 +100,7 @@
      (for [j (range n)]
        (mapv #(nth % j) arr)))))
 
-(defn partition-range
+#_(defn partition-range
   "processes values into 2d array if necessary"
   [values select-str]
   (let [
@@ -115,7 +115,7 @@
           (transpose m)
           (mapv vec m))))))
 
-(defn range-values
+#_(defn range-values
   "Returns array of values selected by select-str."
   [app select-str]
   (let [
@@ -127,7 +127,7 @@
       ;(mapv #(.Value %) range)
       (.Value range))))
 
-(defn excel-reference? [ref]
+#_(defn excel-reference? [ref]
   (if (symbol? ref)
     (re-find #"[A-Z]+[0-9]+" (str ref))))
 
@@ -147,7 +147,9 @@
           ]
       (clojure.walk/prewalk f x)))
 
-(defmacro in-macro-context [& body]
+(defmacro in-macro-context
+  "Evaluates body within an Excel macro context so that cell values can be set without throwing an exception."
+  [& body]
   `(do
      (defn ^:excel-macro f#
        [] ~@body)
