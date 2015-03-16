@@ -1,6 +1,7 @@
 (ns excel-repl.interop)
 
 (import ExcelDna.Integration.ExcelReference)
+(import ExcelDna.Integration.XlCall)
 (import ClojureExcel.MainClass)
 
 (require '[clojure.string :as str])
@@ -74,3 +75,17 @@
         ]
     (-> ref .GetValue MainClass/RaggedArray)))
 
+(defn insert-formula
+  "Takes a single formula and inserts it into one or many cells.
+  Use this instead of insert-values when you have a formula.
+  Because Excel-REPL abuses threads the formulas may be stale when first inserted.
+  "
+  [ref formula]
+  (let [
+        [sheet ref] (if (.Contains ref "!") (str/split ref #"!") [nil ref])
+        refs (if (.Contains ref ":") (str/split ref #":") [ref ref])
+        [i id] (map row-num refs)
+        [j jd] (map col-num refs)
+        ref (if sheet (ExcelReference. i id j jd sheet) (ExcelReference. i id j jd))
+        ]
+    (XlCall/Excel XlCall/xlcFormulaFill (object-array [formula ref]))))

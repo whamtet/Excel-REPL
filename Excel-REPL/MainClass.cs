@@ -1,4 +1,4 @@
-using clojure.lang;
+﻿using clojure.lang;
 using ExcelDna.Integration;
 using System;
 using System.Collections.Generic;
@@ -30,8 +30,6 @@ namespace ClojureExcel
         {
             Init();
         }
-        public static Type toRegister;
-        public static String code;
 
         private static Object getFirst(Object o)
         {
