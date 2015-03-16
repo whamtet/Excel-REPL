@@ -34,10 +34,14 @@ Excel REPL assumes all arguments are passed as single cell selections (A1, B6 et
 
 ##Manipulate
 
-Excel REPL makes it easy to dynamically manipulate the current worksheet.  Use the `in-macro-context` so that the code is evaluated inside an anonymous (Excel) macro.  Setting cell values outside this will throw an exception.
+Excel REPL makes it easy to dynamically manipulate the current worksheet.  Use the `in-macro-context` so that the code is evaluated inside an anonymous (Excel) macro.  Setting cell values outside this will throw an exception, however you may read values at any point in your code.
 
 ```clojure
-(in-macro-context ...)
+(require '[excel-repl.interop :as interop])
+(require '[excel-repl.udf :as udf])
+
+(udf/in-macro-context (interop/insert-formula "D3:E4" "=1+2"))
+
 ```
 Please see [interop.clj](https://github.com/whamtet/Excel-REPL/blob/master/Excel-REPL/nrepl/excel_repl/interop.clj) for the functions to manipulate the worksheet.
 
