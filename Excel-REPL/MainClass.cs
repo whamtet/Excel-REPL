@@ -31,6 +31,14 @@ namespace ClojureExcel
             Init();
         }
 
+        public static void InsertNewWorksheet(String name)
+        {
+            NetOffice.ExcelApi.Application app = NetOffice.ExcelApi.Application.GetActiveInstance();
+            var book = app.ActiveWorkbook;
+            var sheets = book.Worksheets;
+            
+        }
+
         private static Object getFirst(Object o)
         {
             return ((Object[,])o)[0, 0];

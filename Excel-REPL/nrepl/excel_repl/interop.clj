@@ -4,6 +4,9 @@
 (import ExcelDna.Integration.XlCall)
 (import ClojureExcel.MainClass)
 
+(assembly-load "ExcelApi")
+(import NetOffice.ExcelApi.Application)
+
 (require '[clojure.string :as str])
 (def letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 (def letter->val (into {} (map-indexed (fn [i s] [s i]) letters)))
@@ -89,3 +92,28 @@
         ref (if sheet (ExcelReference. i id j jd sheet) (ExcelReference. i id j jd))
         ]
     (XlCall/Excel XlCall/xlcFormulaFill (object-array [formula ref]))))
+
+
+(defn add-sheet
+  "Adds new sheet to current workbook."
+  [name]
+  (let [
+        sheets (-> (Application/GetActiveInstance) .ActiveWorkbook .Worksheets)
+        existing-names (set (map #(.Name %) sheets))
+        name (if (existing-names name)
+               (loop [i 1]
+                 (let [new-name (format "%s (%s)" name i)]
+                   (if (existing-names new-name)
+                     (recur (inc i))
+                     new-name))) name)
+        sheet (.Add sheets)
+        ]
+    (set! (.Name sheet) name)))
+
+(defn get-some [f s]
+  (some #(if (f %) %) s))
+
+#_(defn remove-current-sheet
+  "Removes current sheet.  Careful!"
+  []
+  (-> (Application/GetActiveInstance) .ActiveSheet .Delete));prompts user.  probably a bit dangerous anyway
