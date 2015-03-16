@@ -38,18 +38,31 @@ namespace ClojureExcel
             return ((Object[,])o)[0, 0];
         }
 
+        public static IFn export_udfs, invoke_anonymous_macros;
+
         public static void ExportUdfs()
         {
             try
             {
-                String code = String.Format("(compile-ns '{0})", latestSheetName);
-                //MessageBox.Show(getFirst(my_eval(code, "excel-repl.udf")).ToString());
-                //MessageBox.Show("Exposed " + latestSheetName);
-                my_eval(code, "excel-repl.udf");
+                export_udfs.invoke();
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
+            }
+        }
+
+        [ExcelCommand]
+        public static object InvokeAnonymousMacros()
+        {
+            try
+            {
+                return invoke_anonymous_macros.invoke();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+                return null;
             }
         }
 
@@ -78,7 +91,7 @@ namespace ClojureExcel
 //            var app = ExcelDnaUtil.Application as Microsoft.Office.Interop.Excel.Application;
 //            app.Selection.Insert();
 //;        }
-        
+
         private static void RegisterType(Type t)
         {
             List<MethodInfo> methods = new List<MethodInfo>();
@@ -110,7 +123,7 @@ namespace ClojureExcel
 
                 String clojureSrc = ResourceSlurp("excel-repl.clj");
                 my_eval(clojureSrc, "clojure.core");
-                my_eval(ResourceSlurp("client.clj"), "client");
+                //my_eval(ResourceSlurp("client.clj"), "client");
                 //Object[,] o = (Object[,])my_eval(ResourceSlurp("udf.clj"), "udf");
 
                 //msg = (String)o[0, 0];
@@ -147,9 +160,8 @@ namespace ClojureExcel
         private static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
         private static IFn is_nil = clojure.clr.api.Clojure.var("clojure.core", "nil?");
         private static IFn slurp = clojure.clr.api.Clojure.var("clojure.core", "slurp");
-        private static IFn reset_BANG_ = clojure.clr.api.Clojure.var("clojure.core", "reset!");
-        private static String latestSheetName;
-        private static string msg;
+        
+        private static string msg = "nothing";
 
 
         private static Object doublize(object o)
@@ -381,7 +393,7 @@ nrepl/response-values))
                     output[i, j] = row[j];
                 }
             }
-            
+
             return output;
         }
         private static object pack(object o)
@@ -456,7 +468,6 @@ nrepl/response-values))
             string sheetName = (string)XlCall.Excel(XlCall.xlSheetNm, reference);
             sheetName = Regex.Split(sheetName, "\\]")[1];
             sheetName = sheetName.Replace(" ", "");
-            latestSheetName = sheetName;
             return sheetName;
         }
         public static object Test()

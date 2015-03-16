@@ -2,8 +2,8 @@
 
 (import System.Environment)
 (import System.IO.Directory)
-(require 'excel-repl.udf)
-(import NetOffice.ExcelApi.Application)
+
+;(import NetOffice.ExcelApi.Application)
 
 (require '[clojure.repl :as r])
 (require 'clojure.pprint)
@@ -147,8 +147,8 @@
           ]
       (clojure.walk/prewalk f x)))
 
-(defmacro in-macro-context
-  "Evaluates body within an Excel macro context so that cell values can be set without throwing an exception."
+
+#_(defmacro in-macro-context
   [& body]
   `(do
      (defn ^:excel-macro f#

@@ -8,6 +8,7 @@
 (assembly-load "ExcelApi")
 (import NetOffice.ExcelApi.Application)
 
+(require '[excel-repl.schedule-udf :as schedule-udf])
 
 (def loaded-classes (MainClass/AssemblyPaths))
 (defn load-path [s] (some #(if (.Contains % s) %) loaded-classes))
@@ -40,24 +41,23 @@
 
 (defn filter-arglists [v]
   (let [
-        {:keys [name arglists doc export excel-macro]} (meta v)
+        {:keys [name arglists doc export]} (meta v)
         arglists (remove dirty-arglist? arglists)
-        export-type (if export :export :excel-macro)
         ]
-    (if (and (not-empty arglists) (or export excel-macro)) [(clean-str name) arglists doc export-type (var-get v)])))
+    (if (and (not-empty arglists) export) [(clean-str name) arglists doc (var-get v)])))
 
 (defn filter-ns-interns [ns]
   (filter identity (map filter-arglists (vals (ns-interns ns)))))
 
+(defn filter-all-interns []
+  (mapcat filter-ns-interns (schedule-udf/get-ns)))
+
 (defn append-replace [s a b]
   (.Replace s a (str a b)))
 
-(defn emit-static-method [method-name name arglist doc export-type]
+(defn emit-static-method [method-name name arglist doc]
   (let [
-        doc (if (= :export export-type)
-              (format "[ExcelFunction(Description=@\"%s\")]" (or doc ""))
-              "[ExcelCommand()]")
-        return-type (if (= :export export-type) "object" "void")
+        doc (format "[ExcelFunction(Description=@\"%s\")]" (or doc ""))
         arg-types (map #(if (vector? %) "Object[] " "Object ") arglist)
         clean-args (map #(if (vector? %) (gensym) (clean-str %)) arglist)
         arglist1 (comma-interpose (map str arg-types clean-args))
@@ -70,12 +70,12 @@
             try { return %s.invoke(%s); } catch (Exception e) {return e.ToString();}
             }" doc method-name arglist1 name arglist2)))
 
-(defn emit-static-methods [[name arglists doc export-type]]
+(defn emit-static-methods [[name arglists doc]]
   (let [
         method-names (if (= 1 (count arglists))
                        [(.ToUpper name)]
                        (map #(str (.ToUpper name) (count %)) arglists))]
-    (line-interpose (map #(emit-static-method %1 name %2 doc export-type) method-names arglists))))
+    (line-interpose (map #(emit-static-method %1 name %2 doc) method-names arglists))))
 
 (defn class-str [d]
   (let [
@@ -97,16 +97,32 @@
 (defn get-methods [t]
   (.GetMethods t (enum-or BindingFlags/Public BindingFlags/Static)))
 
-(defn compile-ns [ns]
-  (let [
-        d (filter-ns-interns ns)
-        t (-> d class-str my-compile .CompiledAssembly .GetTypes first)
-        types (map last d)
-        mci (MainClass.)
-        constructor-args (object-array (conj types mci))
-        ]
-    (Activator/CreateInstance t constructor-args)
-    (MainClass/RegisterMethods (get-methods t))))
+(defn export-udfs []
+  (let [d (filter-all-interns)]
+    (if (not-empty d)
+      (let [
+            t (-> d class-str my-compile .CompiledAssembly .GetTypes first)
+            types (map last d)
+            mci (MainClass.)
+            constructor-args (object-array (conj types mci))
+            ]
+        (Activator/CreateInstance t constructor-args)
+        (MainClass/RegisterMethods (get-methods t))))))
 
 (defn export-fns []
+  (schedule-udf/add-curr-ns)
   (.Run (Application/GetActiveInstance) "ExportUdfs"))
+
+(defmacro in-macro-context
+  "Evaluates body within an Excel macro context so that cell values can be set without throwing an exception."
+  [& body]
+  `(do
+     (schedule-udf/add-fn
+      (fn [] ~@body))
+     (.Run (NetOffice.ExcelApi.Application/GetActiveInstance) "InvokeAnonymousMacros")))
+
+(defn invoke-anonymous-macros []
+  (or (last (map #(%) (schedule-udf/get-fns))) "Result Empty"))
+
+(set! MainClass/export_udfs export-udfs)
+(set! MainClass/invoke_anonymous_macros invoke-anonymous-macros)

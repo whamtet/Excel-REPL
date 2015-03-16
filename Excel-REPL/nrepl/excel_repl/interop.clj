@@ -36,13 +36,22 @@
         ]
     (.SetValue ref val)))
 
+(defn regularize-array
+  "ensures array is rectangular"
+  [arr]
+  (let [
+        n (apply max (map count arr))
+        extend #(take n (concat % (repeat nil)))
+        ]
+    (map extend arr)))
+
 (defn insert-values
   "Inserts 2d array of values at ref.  Ref may of the form A1 or SheetName!B6"
   [ref values]
   (let [
         m (count values)
         n (count (first values))
-        values (MainClass/RectangularArray (to-array-2d values))
+        values (-> values regularize-array to-array-2d MainClass/RectangularArray)
         [sheet ref] (if (.Contains ref "!") (str/split ref #"!") [nil ref])
         i (row-num ref)
         j (col-num ref)
@@ -54,7 +63,7 @@
 
 (defn get-values
   "Returns values at ref which is of the form A1, SheetName!B6 or A1:B6.
-   Single cell selections are returned as a value, 2D selections as an Object[][] array"
+  Single cell selections are returned as a value, 2D selections as an Object[][] array"
   [ref]
   (let [
         [sheet ref] (if (.Contains ref "!") (str/split ref #"!") [nil ref])
