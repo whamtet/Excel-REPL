@@ -26,10 +26,15 @@
 (defn col-num
   "column number of reference in form A4 etc"
   [s]
-  (letter->val2 (re-find #"[A-Z]+" s)))
+  (if (string? s)
+    (letter->val2 (re-find #"[A-Z]+" s))
+    (second s)))
 
-(defn row-num [s]
-  (dec (int (re-find #"[0-9]+" s))))
+(defn row-num
+  [s]
+  (if (string? s)
+    (dec (int (re-find #"[0-9]+" s)))
+    (first s)))
 
 (defn insert-value
   "Inserts val at ref."
