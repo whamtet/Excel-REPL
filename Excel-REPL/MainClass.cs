@@ -1,4 +1,4 @@
-﻿using clojure.lang;
+using clojure.lang;
 using ExcelDna.Integration;
 using System;
 using System.Collections.Generic;
@@ -36,7 +36,7 @@ namespace ClojureExcel
             NetOffice.ExcelApi.Application app = NetOffice.ExcelApi.Application.GetActiveInstance();
             var book = app.ActiveWorkbook;
             var sheets = book.Worksheets;
-            
+
         }
 
         private static Object getFirst(Object o)
@@ -96,7 +96,7 @@ namespace ClojureExcel
 //        {
 //            var app = ExcelDnaUtil.Application as Microsoft.Office.Interop.Excel.Application;
 //            app.Selection.Insert();
-//;        }
+//        }
 
         private static void RegisterType(Type t)
         {
@@ -166,7 +166,7 @@ namespace ClojureExcel
         private static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
         private static IFn is_nil = clojure.clr.api.Clojure.var("clojure.core", "nil?");
         private static IFn slurp = clojure.clr.api.Clojure.var("clojure.core", "slurp");
-        
+
         private static string msg = "nothing";
 
 

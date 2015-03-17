@@ -9,6 +9,7 @@
 (import NetOffice.ExcelApi.Application)
 
 (require '[excel-repl.schedule-udf :as schedule-udf])
+(require '[excel-repl.util :as util])
 
 (def loaded-classes (MainClass/AssemblyPaths))
 (defn load-path [s] (some #(if (.Contains % s) %) loaded-classes))
@@ -33,8 +34,6 @@
 (defn clean-str [s]
   (reduce (fn [s [old new]] (.Replace s old new)) (.ToLower (str s)) to-clean))
 
-(defn comma-interpose [s] (apply str (interpose ", " s)))
-(defn line-interpose [s] (apply str (interpose "\r\n" s)))
 
 (defn dirty-arglist? [l]
   (some #(or (= '& %) (map? %)) l))
@@ -60,8 +59,8 @@
         doc (format "[ExcelFunction(Description=@\"%s\")]" (or doc ""))
         arg-types (map #(if (vector? %) "Object[] " "Object ") arglist)
         clean-args (map #(if (vector? %) (gensym) (clean-str %)) arglist)
-        arglist1 (comma-interpose (map str arg-types clean-args))
-        arglist2 (comma-interpose clean-args)
+        arglist1 (util/comma-interpose (map str arg-types clean-args))
+        arglist2 (util/comma-interpose clean-args)
         ]
     (format "%s
             public static object %s(%s)
@@ -75,16 +74,16 @@
         method-names (if (= 1 (count arglists))
                        [(.ToUpper name)]
                        (map #(str (.ToUpper name) (count %)) arglists))]
-    (line-interpose (map #(emit-static-method %1 name %2 doc) method-names arglists))))
+    (util/line-interpose (map #(emit-static-method %1 name %2 doc) method-names arglists))))
 
 (defn class-str [d]
   (let [
 
         fns (map first d)
-        fn-str (comma-interpose fns)
-        construct-fn-str (comma-interpose (map #(str "IFn " %) fns))
+        fn-str (util/comma-interpose fns)
+        construct-fn-str (util/comma-interpose (map #(str "IFn " %) fns))
         construct-body-str (apply str (map #(format "        Class1.%s = %s;\r\n" % %) fns))
-        static-methods (line-interpose (map emit-static-methods d))
+        static-methods (util/line-interpose (map emit-static-methods d))
 
         s (MainClass/ResourceSlurp "Class1.cs")
         s (.Replace s "ifn_list" fn-str)
@@ -126,3 +125,5 @@
 
 (set! MainClass/export_udfs export-udfs)
 (set! MainClass/invoke_anonymous_macros invoke-anonymous-macros)
+
+

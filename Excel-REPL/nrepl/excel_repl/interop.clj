@@ -8,6 +8,8 @@
 (import NetOffice.ExcelApi.Application)
 
 (require '[clojure.string :as str])
+(require '[excel-repl.util :as util])
+
 (def letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 (def letter->val (into {} (map-indexed (fn [i s] [s i]) letters)))
 
@@ -30,51 +32,62 @@
   (dec (int (re-find #"[0-9]+" s))))
 
 (defn insert-value
-  "Inserts val at ref.  Ref may be of the form A1 or SheetName!B6"
-  [ref val]
+  "Inserts val at ref."
+  [sheet ref val]
   (let [
-        [sheet ref] (if (.Contains ref "!") (str/split ref #"!") [nil ref])
         i (row-num ref)
         j (col-num ref)
-        ref (if sheet (ExcelReference. i i j j sheet) (ExcelReference. i j))
+        ref (ExcelReference. i i j j sheet)
         ]
     (.SetValue ref val)))
+
+(defn split-str [s]
+  (map #(str "\"" (apply str %) "\"") (partition-all 250 s)))
+
+(defn concatenated-str [s]
+  (format "CONCATENATE(%s)" (util/comma-interpose (split-str s))))
+
+(defn excel-pr-str [s]
+  (if (string? s) (concatenated-str (.Replace s "\"" "\"\"")) s))
+
+(defn formula-str [f & args]
+  (format "=%s(%s)" f (util/comma-interpose (map excel-pr-str args))))
+
 
 (defn regularize-array
   "ensures array is rectangular"
   [arr]
   (let [
         n (apply max (map count arr))
-        extend #(take n (concat % (repeat nil)))
+        extend #(take n (concat % (repeat "")))
         ]
     (map extend arr)))
 
 (defn insert-values
-  "Inserts 2d array of values at ref.  Ref may of the form A1 or SheetName!B6"
-  [ref values]
+  "Inserts 2d array of values at ref."
+  [sheet ref values]
   (let [
+        values (regularize-array values)
         m (count values)
         n (count (first values))
-        values (-> values regularize-array to-array-2d MainClass/RectangularArray)
-        [sheet ref] (if (.Contains ref "!") (str/split ref #"!") [nil ref])
+        values (-> values to-array-2d MainClass/RectangularArray)
         i (row-num ref)
         j (col-num ref)
         id (+ i m -1)
         jd (+ j n -1)
-        ref (if sheet (ExcelReference. i id j jd sheet) (ExcelReference. i id j jd))
+        ref (ExcelReference. i id j jd sheet)
         ]
     (-> ref (.SetValue values))))
 
 (defn get-values
-  "Returns values at ref which is of the form A1, SheetName!B6 or A1:B6.
+  "Returns values at ref which is of the form A1 or A1:B6.
   Single cell selections are returned as a value, 2D selections as an Object[][] array"
-  [ref]
+  [sheet ref]
   (let [
-        [sheet ref] (if (.Contains ref "!") (str/split ref #"!") [nil ref])
         refs (if (.Contains ref ":") (str/split ref #":") [ref ref])
         [i id] (map row-num refs)
         [j jd] (map col-num refs)
-        ref (if sheet (ExcelReference. i id j jd sheet) (ExcelReference. i id j jd))
+        ref (ExcelReference. i id j jd sheet)
         ]
     (-> ref .GetValue MainClass/RaggedArray)))
 
@@ -83,13 +96,12 @@
   Use this instead of insert-values when you have a formula.
   Because Excel-REPL abuses threads the formulas may be stale when first inserted.
   "
-  [ref formula]
+  [sheet ref formula]
   (let [
-        [sheet ref] (if (.Contains ref "!") (str/split ref #"!") [nil ref])
         refs (if (.Contains ref ":") (str/split ref #":") [ref ref])
         [i id] (map row-num refs)
         [j jd] (map col-num refs)
-        ref (if sheet (ExcelReference. i id j jd sheet) (ExcelReference. i id j jd))
+        ref (ExcelReference. i id j jd sheet)
         ]
     (XlCall/Excel XlCall/xlcFormulaFill (object-array [formula ref]))))
 
@@ -114,6 +126,6 @@
   (some #(if (f %) %) s))
 
 #_(defn remove-current-sheet
-  "Removes current sheet.  Careful!"
-  []
-  (-> (Application/GetActiveInstance) .ActiveSheet .Delete));prompts user.  probably a bit dangerous anyway
+    "Removes current sheet.  Careful!"
+    []
+    (-> (Application/GetActiveInstance) .ActiveSheet .Delete));prompts user.  probably a bit dangerous anyway
