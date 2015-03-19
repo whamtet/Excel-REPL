@@ -126,4 +126,23 @@
 (set! MainClass/export_udfs export-udfs)
 (set! MainClass/invoke_anonymous_macros invoke-anonymous-macros)
 
+(defn split-words [n s]
+  (loop [
+         todo s
+         sb (StringBuilder.)
+         i 0
+         done []]
+    (if-let [c (first todo)]
+      (do
+        (.Append sb c)
+        (if (and (> i n) (= \space c))
+          (recur (rest s) (StringBuilder.) 0 (conj done (str sb)))
+          (recur (rest s) sb (inc i) done)))
+      (let [
+            last-line (str sb)
+            ]
+        (if (= "" last-line)
+          done
+          (conj done last-line))))))
+
 

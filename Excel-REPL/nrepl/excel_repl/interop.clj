@@ -64,7 +64,7 @@
   [arr]
   (let [
         n (apply max (map count arr))
-        extend #(take n (concat % (repeat "")))
+        extend #(take n (concat % (repeat nil)))
         ]
     (map extend arr)))
 
@@ -127,10 +127,26 @@
         ]
     (set! (.Name sheet) name)))
 
-(defn get-some [f s]
-  (some #(if (f %) %) s))
-
-#_(defn remove-current-sheet
-    "Removes current sheet.  Careful!"
-    []
-    (-> (Application/GetActiveInstance) .ActiveSheet .Delete));prompts user.  probably a bit dangerous anyway
+(defn require-sheet [v]
+  "Require excel spreadsheet.  V is of form
+  [sheet A C D]
+  [sheet A C D :as alias]
+  A C D are the columns containing source code"
+  (let [
+        sheet-name (first v)
+        [_as alias-name] (take-last 2 v)
+        [alias-name cols]
+        (if (= :as _as)
+          [alias-name (drop 1 (drop-last 2 v))]
+          [sheet-name (drop 1 v)])
+        source
+        (apply str
+               (flatten
+                (for [col cols]
+                  (util/line-interpose
+                   (filter string?
+                           (map first
+                                (get-values (str sheet-name) (format "%s1:%s200" col col))))))))
+        ]
+    (MainClass/my_eval source (str sheet-name))
+    (require (vector sheet-name :as alias-name))))

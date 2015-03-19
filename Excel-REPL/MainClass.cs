@@ -39,7 +39,7 @@ namespace ClojureExcel
 
         }
 
-        private static Object getFirst(Object o)
+        private static Object GetFirst(Object o)
         {
             return ((Object[,])o)[0, 0];
         }
@@ -129,12 +129,13 @@ namespace ClojureExcel
 
                 String clojureSrc = ResourceSlurp("excel-repl.clj");
                 my_eval(clojureSrc, "clojure.core");
-                //my_eval(ResourceSlurp("client.clj"), "client");
-                //Object[,] o = (Object[,])my_eval(ResourceSlurp("udf.clj"), "udf");
-
-                //msg = (String)o[0, 0];
-
-
+                //try loading main within main
+                String main_load = @"
+(require '[excel-repl.interop :as interop])
+(interop/require-sheet '[main A])
+(main/main)
+";
+                msg = (String)GetFirst(my_eval(main_load, "main-load"));
             }
             catch (Exception e)
             {
@@ -262,11 +263,11 @@ nrepl/response-values))
             return my_eval(input, "client");
         }
 
-        private static Object my_eval(String input)
+        public static Object my_eval(String input)
         {
             return my_eval(input, getSheetName());
         }
-        private static Object my_eval(String input, String sheetName)
+        public static Object my_eval(String input, String sheetName)
         {
             Object o;
             try
