@@ -139,14 +139,18 @@
         (if (= :as _as)
           [alias-name (drop 1 (drop-last 2 v))]
           [sheet-name (drop 1 v)])
-        source
-        (apply str
+        ns-aliases (-> *ns* ns-aliases keys set)
+        ]
+    (if-not (ns-aliases alias-name)
+      (let [
+            source
+            (apply str
                (flatten
                 (for [col cols]
                   (util/line-interpose
                    (filter string?
                            (map first
                                 (get-values (str sheet-name) (format "%s1:%s200" col col))))))))
-        ]
-    (MainClass/my_eval source (str sheet-name))
+            ]
+        (MainClass/my_eval source (str sheet-name))))
     (require (vector sheet-name :as alias-name))))
