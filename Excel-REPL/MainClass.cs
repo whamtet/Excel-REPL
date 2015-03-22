@@ -20,6 +20,7 @@ using System.Linq.Expressions;
 using System.Windows.Forms;
 using System.CodeDom.Compiler;
 using Microsoft.CSharp;
+using MongoDB.Bson;
 
 namespace ClojureExcel
 {
@@ -128,14 +129,14 @@ namespace ClojureExcel
                 appendLoadPath(tempFolder);
 
                 String clojureSrc = ResourceSlurp("excel-repl.clj");
-                my_eval(clojureSrc, "clojure.core");
+                msg = (String)GetFirst(my_eval(clojureSrc, "clojure.core"));
                 //try loading main within main
                 String main_load = @"
 (require '[excel-repl.interop :as interop])
 (interop/require-sheet '[main A])
 (main/main)
 ";
-                msg = (String)GetFirst(my_eval(main_load, "main-load"));
+//                msg = (String)GetFirst(my_eval(main_load, "main-load"));
             }
             catch (Exception e)
             {
@@ -167,7 +168,7 @@ namespace ClojureExcel
         private static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
         private static IFn is_nil = clojure.clr.api.Clojure.var("clojure.core", "nil?");
         private static IFn slurp = clojure.clr.api.Clojure.var("clojure.core", "slurp");
-
+        public static Dictionary<String, String> d = new Dictionary<String, String>();
         private static string msg = "nothing";
 
 

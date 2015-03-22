@@ -152,5 +152,5 @@
                            (map first
                                 (get-values (str sheet-name) (format "%s1:%s200" col col))))))))
             ]
-        (MainClass/my_eval source (str sheet-name))))
-    (require (vector sheet-name :as alias-name))))
+        (MainClass/my_eval source (str sheet-name))
+        (require (vector sheet-name :as alias-name))))))

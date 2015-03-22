@@ -23,17 +23,17 @@
 (defn get-load-path []
   (set (string/split (Environment/GetEnvironmentVariable "CLOJURE_LOAD_PATH") #";")))
 
-(defn set-load-path [s]
+(defn set-load-path! [s]
   (let [
         new-path (apply str (interpose ";" s))
         ]
     (Environment/SetEnvironmentVariable "CLOJURE_LOAD_PATH" new-path)
     new-path))
 
-(defn append-load-path
+(defn append-load-path!
   "appends file string to clojure load path"
   [new-path]
-  (set-load-path (conj (get-load-path) new-path)))
+  (set-load-path! (conj (get-load-path) new-path)))
 
 (defn split-lines [s]
   (string/split s #"\n"))

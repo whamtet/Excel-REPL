@@ -4,6 +4,7 @@
 (import Microsoft.CSharp.CSharpCodeProvider)
 (import System.Reflection.BindingFlags)
 (import ClojureExcel.MainClass)
+(import System.Windows.Forms.MessageBox)
 
 (assembly-load "ExcelApi")
 (import NetOffice.ExcelApi.Application)
@@ -78,7 +79,6 @@
 
 (defn class-str [d]
   (let [
-
         fns (map first d)
         fn-str (util/comma-interpose fns)
         construct-fn-str (util/comma-interpose (map #(str "IFn " %) fns))
