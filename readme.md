@@ -83,7 +83,7 @@ If you wish to pull stuff off the net straight into your worksheet [clr-http-lit
 
 ##Database
 
-Excel REPL provides convenience methods for connecting to a database
+Excel REPL provides convenience methods for connecting directly to a mongo database
 
 ```clojure
 (require '[excel-repl.coerce-db :as coerce-db])
@@ -91,8 +91,34 @@ Excel REPL provides convenience methods for connecting to a database
 (defonce connection (DB/Connect))
 
 (DB/Set connection "test-values" (coerce-db/clojure->mongo {:hi "there"} ))
-(-> connection (DB/Get "test-values") coerce-db/mongo->clojure str)
+(-> connection (DB/Get "test-values") coerce-db/mongo->clojure str); {:hi "there"}
 ```
+
+##NREPL
+
+Excel REPL uses ClojureCLR which has less support than the main JVM implementation.  You wish to connect to an external Clojure repl.  Both HTTP and TCP are supported.
+
+```clojure
+(require '[clojure.tools.nrepl :as nrepl])
+(require '[clojure.data.drawbridge-client :as drawbridge-client]) ;Adds Http support to Nrepl, doesn't supply any functions
+
+(def tcp-client (nrepl/client (nrepl/url-connect "nrepl://localhost:50000")))
+(def http-client (nrepl/client (nrepl/url-connect "http://some.server/drawbridge-client")))
+
+(defn remote-eval-str
+"evaluates string on remote repl"
+[code-str]
+(-> tcp-client
+(nrepl/message {:op "eval" :code code-str})
+nrepl/response-values))
+
+(defmacro remote-eval [& body]
+`(first (remote-eval-str (nrepl/code ~@body))))
+
+(remote-eval (+ 1 2)); 3
+```
+
+For information about connecting to a Clojure repl via Http, visit [Drawbridge](https://github.com/cemerick/drawbridge).
 
 ##Build and Installation
 
