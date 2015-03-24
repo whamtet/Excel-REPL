@@ -32,6 +32,8 @@ Concatenates the contents of selected cells and evaluates them in namespace Shee
 
 Excel REPL assumes all arguments are passed as single cell selections (A1, B6 etc).  To indicate that an argument should be an array selection declare that argument with vector destructuring.
 
+`excel-repl.udf/export-fns` abuses Excel slightly and may fail on the first two invocations in a given Excel session.  It is nonetheless very useful.
+
 ##Manipulate
 
 Excel REPL makes it easy to dynamically manipulate the current workbook.  Use the `in-macro-context` so that the code is evaluated inside an anonymous (Excel) macro.  Setting cell values outside this will throw an exception, however you may read values at any point in your code.
@@ -96,7 +98,7 @@ Excel REPL provides convenience methods for connecting directly to a mongo datab
 
 ##NREPL
 
-Excel REPL uses ClojureCLR which has less support than the main JVM implementation.  You may wish to connect to an external Clojure repl.  Both HTTP and TCP are supported.
+Excel REPL uses ClojureCLR which has less support than the main JVM implementation.  You may wish to connect to an external Clojure repl.  Both HTTP and TCP connections are supported.
 
 ```clojure
 (require '[clojure.tools.nrepl :as nrepl])

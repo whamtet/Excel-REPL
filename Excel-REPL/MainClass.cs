@@ -112,6 +112,7 @@ namespace ClojureExcel
 
             //ExcelIntegration.RegisterMethods(methods);
         }
+        
 
         private static void Init()
         {
