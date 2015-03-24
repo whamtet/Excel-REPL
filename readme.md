@@ -100,7 +100,7 @@ Excel REPL uses ClojureCLR which has less support than the main JVM implementati
 
 ```clojure
 (require '[clojure.tools.nrepl :as nrepl])
-(require '[clojure.data.drawbridge-client :as drawbridge-client]) ;Adds Http support to Nrepl functions
+(require '[clojure.data.drawbridge-client :as drawbridge-client]) ;Adds Http support to Nrepl
 
 (def tcp-client (nrepl/client (nrepl/url-connect "nrepl://localhost:50000")))
 (def http-client (nrepl/client (nrepl/url-connect "http://some.server/drawbridge-client")))
