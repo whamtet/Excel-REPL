@@ -12,7 +12,7 @@
 (require '[excel-repl.schedule-udf :as schedule-udf])
 (require '[excel-repl.util :as util])
 
-(def loaded-classes (MainClass/AssemblyPaths))
+(def loaded-classes (MainClass/AssemblyPaths));convenience method because Stack Overflow gave the example in C#
 (defn load-path [s] (some #(if (.Contains % s) %) loaded-classes))
 
 (defn my-compile [code]
@@ -21,7 +21,6 @@
         ]
     (set! (.GenerateExecutable cp) false)
     (set! (.GenerateInMemory cp) true)
-
     (-> cp .ReferencedAssemblies (.Add (load-path "System.Windows.Forms.dll")))
     (-> cp .ReferencedAssemblies (.Add (load-path "Clojure.dll")))
     (-> cp .ReferencedAssemblies (.Add (load-path "ExcelDna.Integration.dll")))

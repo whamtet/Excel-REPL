@@ -7,9 +7,6 @@
 ;;for in-macro-context we shall concatenate a list of fuctions to execute
 ;;INVOKEMacroContext shall execute them all and return the last result
 
-
-;;need to define a macro that defines the properties that we want
-
 (def nss (ref []))
 (def fns (ref []))
 

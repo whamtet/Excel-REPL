@@ -21,6 +21,8 @@ using System.Windows.Forms;
 using System.CodeDom.Compiler;
 using Microsoft.CSharp;
 using MongoDB.Bson;
+using MongoDB.Driver;
+using MongoDB.Driver.Builders;
 
 namespace ClojureExcel
 {
@@ -478,24 +480,7 @@ nrepl/response-values))
             sheetName = sheetName.Replace(" ", "");
             return sheetName;
         }
-        public static object Test()
-        {
-            object[,] values = new object[2, 2];
-            values[0, 0] = 1;
-            values[0, 1] = 2;
-            values[1, 0] = 3;
-            values[1, 1] = 4;
 
-            return values;
-
-        }
-
-        public static List<MethodInfo> MakeList(MethodInfo i)
-        {
-            List<MethodInfo> oot = new List<MethodInfo>();
-            oot.Add(i);
-            return oot;
-        }
 
         public static Object TakeItem(BlockingCollection<Object> c)
         {

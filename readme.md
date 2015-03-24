@@ -81,6 +81,19 @@ If you wish to pull stuff off the net straight into your worksheet [clr-http-lit
 
 ```
 
+##Database
+
+Excel REPL provides convenience methods for connecting to a database
+
+```clojure
+(require '[excel-repl.coerce-db :as coerce-db])
+
+(defonce connection (DB/Connect))
+
+(DB/Set connection "test-values" (coerce-db/clojure->mongo {:hi "there"} ))
+(-> connection (DB/Get "test-values") coerce-db/mongo->clojure str)
+```
+
 ##Build and Installation
 
 The build process is a bit of a manual hack.  Please contact the author if you want help with this.
