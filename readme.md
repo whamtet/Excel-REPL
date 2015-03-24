@@ -96,11 +96,11 @@ Excel REPL provides convenience methods for connecting directly to a mongo datab
 
 ##NREPL
 
-Excel REPL uses ClojureCLR which has less support than the main JVM implementation.  You wish to connect to an external Clojure repl.  Both HTTP and TCP are supported.
+Excel REPL uses ClojureCLR which has less support than the main JVM implementation.  You may wish to connect to an external Clojure repl.  Both HTTP and TCP are supported.
 
 ```clojure
 (require '[clojure.tools.nrepl :as nrepl])
-(require '[clojure.data.drawbridge-client :as drawbridge-client]) ;Adds Http support to Nrepl, doesn't supply any functions
+(require '[clojure.data.drawbridge-client :as drawbridge-client]) ;Adds Http support to Nrepl functions
 
 (def tcp-client (nrepl/client (nrepl/url-connect "nrepl://localhost:50000")))
 (def http-client (nrepl/client (nrepl/url-connect "http://some.server/drawbridge-client")))
@@ -108,12 +108,12 @@ Excel REPL uses ClojureCLR which has less support than the main JVM implementati
 (defn remote-eval-str
 "evaluates string on remote repl"
 [code-str]
-(-> tcp-client
-(nrepl/message {:op "eval" :code code-str})
-nrepl/response-values))
+  (-> tcp-client
+  (nrepl/message {:op "eval" :code code-str})
+  nrepl/response-values))
 
 (defmacro remote-eval [& body]
-`(first (remote-eval-str (nrepl/code ~@body))))
+  `(first (remote-eval-str (nrepl/code ~@body))))
 
 (remote-eval (+ 1 2)); 3
 ```
