@@ -1,13 +1,10 @@
 #Excel REPL
 
-![WFT](WFT.png)
-```clojure
-;This is a macro
-(defmacro kick-some-ass [how-much?]
-  `(do ~@(repeat how-much? '(kick-ass!))))
-```
+Boost your productivity with a full Clojure programming environment in Microsoft Excel
 
-As much as we all love VBA there are better languages available such as ... Clojure.  Excel REPL makes it easy to start a ClojureCLR Repl from within Excel.  Simply install it as an Excel Add-In to provide a few additional Excel Functions
+![Screenshot](Spreadsheet Snapshot.png)
+
+Excel REPL makes it easy to start a ClojureCLR Repl from within Excel.  Simply install it as an Excel Add-In to provide a few additional Excel Functions
 
 ##Load
 
