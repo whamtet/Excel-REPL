@@ -128,7 +128,3 @@ To install on a machine copy the contents of Excel-REPL/bin/Debug into ~/AppData
 ##System Requirements
 
 Excel Repl works with Microsoft Excel 97+ (that's quite old) and Microsoft .NET 4.0 or 4.5.
-
-##Good Riddance VBA
-
-What a crap language.  Lisp existed then, so why did Microsoft create VBA?  Because they're Microsoft.
