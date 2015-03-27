@@ -10,6 +10,7 @@
 (require '[clojure.string :as str])
 (require '[excel-repl.util :as util])
 
+
 (def letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 (def letter->val (into {} (map-indexed (fn [i s] [s i]) letters)))
 
@@ -55,7 +56,10 @@
 (defn excel-pr-str [s]
   (if (string? s) (concatenated-str (.Replace s "\"" "\"\"")) s))
 
-(defn formula-str [f & args]
+(defn formula-str
+  "Generates Excel formula string =f(arg1, \"arg2\"...).
+  Long strings a split via =CONCATENATE to conform to the Excel 255 character limit"
+  [f & args]
   (format "=%s(%s)" f (util/comma-interpose (map excel-pr-str args))))
 
 
@@ -145,12 +149,24 @@
       (let [
             source
             (apply str
-               (flatten
-                (for [col cols]
-                  (util/line-interpose
-                   (filter string?
-                           (map first
-                                (get-values (str sheet-name) (format "%s1:%s200" col col))))))))
+                   (flatten
+                    (for [col cols]
+                      (util/line-interpose
+                       (filter string?
+                               (map first
+                                    (get-values (str sheet-name) (format "%s1:%s200" col col))))))))
             ]
         (MainClass/my_eval source (str sheet-name))
         (require (vector sheet-name :as alias-name))))))
+
+(defmacro clear-contents
+  "Clears an m by n grid at sheet, ref.
+  Must be called inside udf/in-macro-context"
+  [sheet ref m n]
+  `(interop/insert-values ~sheet ~ref
+                          (let [
+                                row# (repeat ~n nil)
+                                rows# (repeat ~m row#)
+                                ]
+                            rows#)))
+

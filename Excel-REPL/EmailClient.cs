@@ -10,35 +10,44 @@ using System.Text;
 
 public static class EmailClient
 {
-    public static List<Dictionary<String, String>> GetInbox(String user, String password)
+    public static List<Dictionary<Object, Object>> GetInbox(String user, String password)
     {
-        List<Dictionary<String, String>> output = new List<Dictionary<String, String>>();
+        List<Dictionary<Object, Object>> output = new List<Dictionary<Object, Object>>();
         using (Imap imap = new Imap())
         {
             imap.ConnectSSL("imap.gmail.com");
             imap.Login(user, password);
 
             imap.SelectInbox();
-
-            List<long> uids = imap.Search(Flag.All);
             
+            List<long> uids = imap.Search(Flag.All);
+            int numSelected = 0;
             foreach (long uid in uids)
             {
+
                 var eml = imap.GetMessageByUID(uid);
                 IMail mail = new MailBuilder().CreateFromEml(eml);
-                Dictionary<String, String> message = new Dictionary<string, string>();
 
-                StringBuilder fromBuilder = new StringBuilder();
+                Dictionary<Object, Object> message = new Dictionary<object, object>();
+                List<Object> fromObjects = new List<Object>();
                 foreach (var fromItem in mail.From)
                 {
-                    fromBuilder.Append(fromItem.ToString() + " ");
+                    Dictionary<Object, Object> fromObject = new Dictionary<object, object>();
+                    fromObject.Add("address", fromItem.Address);
+                    fromObject.Add("name", fromItem.Name);
+                    fromObjects.Add(fromObject);
                 }
-                message.Add("from", fromBuilder.ToString());
+                message.Add("from", fromObjects);
 
                 message.Add("subject", mail.Subject);
                 message.Add("text", mail.GetBodyAsText());
                 output.Add(message);
 
+                numSelected++;
+                if (numSelected == 100)
+                {
+                    break;
+                }
             }
             imap.Close();
         }
@@ -78,9 +87,7 @@ public static class EmailClient
     }
     public static void Main(String[] args)
     {
-        //SendMessage(String username, String password, String from, String[] to, String subject, String body)
-        SendMessage("whamtet.test@gmail.com", "NeedEmail", new String[] { "whamtet@gmail.com" }, "Hi there", "How are you?");
-        Console.ReadLine();
+        GetInbox("whamtet@gmail.com", "NeedaEmail_1");
     }
 }
     

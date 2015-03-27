@@ -32,7 +32,7 @@ Concatenates the contents of selected cells and evaluates them in namespace Shee
 
 Excel REPL assumes all arguments are passed as single cell selections (A1, B6 etc).  To indicate that an argument should be an array selection declare that argument with vector destructuring.
 
-`excel-repl.udf/export-fns` abuses Excel slightly and may fail on the first two invocations in a given Excel session.  It is nonetheless very useful.
+`excel-repl.udf/export-fns` abuses Excel slightly and may fail on the first one or two invocations in a given session.
 
 ##Manipulate
 
