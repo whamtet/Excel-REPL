@@ -92,4 +92,3 @@
   Int64
   (clojure->mongo [o] (BsonInt64. o))
   )
-

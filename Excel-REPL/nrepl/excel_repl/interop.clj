@@ -96,9 +96,11 @@
         refs (if (.Contains ref ":") (str/split ref #":") [ref ref])
         [i id] (map row-num refs)
         [j jd] (map col-num refs)
-        ref (ExcelReference. i id j jd sheet)
+        value (.GetValue (ExcelReference. i id j jd sheet))
         ]
-    (-> ref .GetValue MainClass/RaggedArray)))
+    (if (.Contains ref ":")
+      (MainClass/RaggedArray value)
+      value)))
 
 (defn insert-formula
   "Takes a single formula and inserts it into one or many cells.

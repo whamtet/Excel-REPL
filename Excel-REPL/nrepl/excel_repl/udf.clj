@@ -24,6 +24,8 @@
     (-> cp .ReferencedAssemblies (.Add (load-path "System.Windows.Forms.dll")))
     (-> cp .ReferencedAssemblies (.Add (load-path "Clojure.dll")))
     (-> cp .ReferencedAssemblies (.Add (load-path "ExcelDna.Integration.dll")))
+;    (-> cp .ReferencedAssemblies (.Add (load-path "System.dll")))
+;    (-> cp .ReferencedAssemblies (.Add "Z:\\Documents\\Visual Studio 2013\\Projects\\Excel-REPL\\ProcessOutput\\bin\\Debug"))
     (-> cp .ReferencedAssemblies (.Add (load-path "System.Core.dll")))
     (.CompileAssemblyFromSource
      (CSharpCodeProvider.)
@@ -51,9 +53,6 @@
 (defn filter-all-interns []
   (mapcat filter-ns-interns (schedule-udf/get-ns)))
 
-(defn append-replace [s a b]
-  (.Replace s a (str a b)))
-
 (defn emit-static-method [method-name name arglist doc]
   (let [
         doc (format "[ExcelFunction(Description=@\"%s\")]" (or doc ""))
@@ -65,8 +64,7 @@
     (format "%s
             public static object %s(%s)
             {
-            //MessageBox.Show(\"invoking\");
-            try { return %s.invoke(%s); } catch (Exception e) {return e.ToString();}
+            try { return cleanValue(%s.invoke(%s)); } catch (Exception e) {return e.ToString();}
             }" doc method-name arglist1 name arglist2)))
 
 (defn emit-static-methods [[name arglists doc]]
@@ -87,7 +85,7 @@
         s (MainClass/ResourceSlurp "Class1.cs")
         s (.Replace s "ifn_list" fn-str)
         s (.Replace s "IFn foo" construct-fn-str)
-        s (append-replace s "Class1.MainClassInstance = MainClass;\r\n" construct-body-str)
+        s (.Replace s "foo;" construct-body-str)
         s (.Replace s "    private void Poo() { }" static-methods)
         ]
     s))
@@ -101,8 +99,7 @@
       (let [
             t (-> d class-str my-compile .CompiledAssembly .GetTypes first)
             types (map last d)
-            mci (MainClass.)
-            constructor-args (object-array (conj types mci))
+            constructor-args (object-array types)
             ]
         (Activator/CreateInstance t constructor-args)
         (MainClass/RegisterMethods (get-methods t))))))

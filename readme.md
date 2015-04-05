@@ -48,13 +48,15 @@ Please see [interop.clj](https://github.com/whamtet/Excel-REPL/blob/master/Excel
 
 ##Returning 1D and 2D arrays
 
-If your function returns a 1 or 2 dimensional collection you may paste it into a range of Excel Cells.  To do so
+If `Load` returns a 1 or 2 dimensional collection you may paste it into a range of Excel Cells.  To do so
 
 1) Drag from the top left hand corner the number of cells for your output
 
 2) Click in the formula bar and enter your formula
 
 3) Press Control + Shift + Enter instead of simply enter
+
+WARNING: Only `Load` can be used in this way.  If you return exported functions in this way Excel will crash.
 
 ##Error Messages
 
