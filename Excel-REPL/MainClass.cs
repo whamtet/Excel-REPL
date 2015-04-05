@@ -10,6 +10,7 @@ using System.Reflection;
 using Ionic.Zip;
 using System.Collections.Concurrent;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace ClojureExcel
 {
@@ -19,6 +20,18 @@ namespace ClojureExcel
         public void AutoOpen()
         {
             Init();
+            ExcelIntegration.RegisterUnhandledExceptionHandler(
+                ex => "!!! EXCEPTION: " + ex.ToString());
+        }
+        public static object SleepAsync(string ms, string message)
+        {
+            return ExcelAsyncUtil.Run("SleepAsync", new Object[] {ms, message}, delegate
+            {
+                //Debug.Print("{1:HH:mm:ss.fff} Sleeping for {0} ms", ms, DateTime.Now);
+                Thread.Sleep(int.Parse(ms));
+                //Debug.Print("{1:HH:mm:ss.fff} Done sleeping {0} ms", ms, DateTime.Now);
+                return "Woke Up at " + DateTime.Now.ToString("1:HH:mm:ss.fff") + message;
+            });
         }
 
         public static void InsertNewWorksheet(String name)
@@ -144,9 +157,9 @@ namespace ClojureExcel
             return loadPath;
         }
         private static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
-        private static IFn is_nil = clojure.clr.api.Clojure.var("clojure.core", "nil?");
+ //       private static IFn is_nil = clojure.clr.api.Clojure.var("clojure.core", "nil?");
         private static IFn slurp = clojure.clr.api.Clojure.var("clojure.core", "slurp");
-        private static IFn number = clojure.clr.api.Clojure.var("clojure.core", "number?");
+//        private static IFn number = clojure.clr.api.Clojure.var("clojure.core", "number?");
         public static Dictionary<String, String> d = new Dictionary<String, String>();
         private static string msg = "nothing";
 
@@ -180,7 +193,7 @@ namespace ClojureExcel
 
         private static Object cleanValue(object o)
         {
-            if ((bool)is_nil.invoke(o))
+            if (o == null)
             {
                 return "";
             }
@@ -192,7 +205,17 @@ namespace ClojureExcel
             {
                 return ((Ratio)o).ToDouble(null);
             }
-            if ((bool)number.invoke(o))
+            if (o is sbyte
+            || o is byte
+            || o is short
+            || o is ushort
+            || o is int
+            || o is uint
+            || o is long
+            || o is ulong
+            || o is float
+            || o is double
+            || o is decimal)
             {
                 return o;
             }

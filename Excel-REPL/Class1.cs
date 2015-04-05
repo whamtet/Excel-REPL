@@ -2,6 +2,7 @@ using clojure.lang;
 using ExcelDna.Integration;
 using System;
 using System.Windows.Forms;
+using System.Threading;
 //using System.Text.RegularExpressions;
 
 public class Class1

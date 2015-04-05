@@ -42,10 +42,10 @@
 
 (defn filter-arglists [v]
   (let [
-        {:keys [name arglists doc export]} (meta v)
+        {:keys [name arglists doc export async]} (meta v)
         arglists (remove dirty-arglist? arglists)
         ]
-    (if (and (not-empty arglists) export) [(clean-str name) arglists doc (var-get v)])))
+    (if (and (not-empty arglists) export) [(clean-str name) arglists doc async (var-get v)])))
 
 (defn filter-ns-interns [ns]
   (filter identity (map filter-arglists (vals (ns-interns ns)))))
@@ -53,26 +53,34 @@
 (defn filter-all-interns []
   (mapcat filter-ns-interns (schedule-udf/get-ns)))
 
-(defn emit-static-method [method-name name arglist doc]
+(defn emit-static-method [method-name name arglist doc async]
   (let [
         doc (format "[ExcelFunction(Description=@\"%s\")]" (or doc ""))
         arg-types (map #(if (vector? %) "Object[] " "Object ") arglist)
         clean-args (map #(if (vector? %) (gensym) (clean-str %)) arglist)
         arglist1 (util/comma-interpose (map str arg-types clean-args))
         arglist2 (util/comma-interpose clean-args)
+
+        invoke-body (format "try { return cleanValue(%s.invoke(%s)); } catch (Exception e) {return e.ToString();}" name arglist2)
+        invoke-body (if async
+                      (format "return ExcelAsyncUtil.Run(\"\", new Object[]{%s}, delegate
+                              {
+                              %s
+                              });" arglist2 invoke-body)
+                      invoke-body)
         ]
     (format "%s
             public static object %s(%s)
             {
-            try { return cleanValue(%s.invoke(%s)); } catch (Exception e) {return e.ToString();}
-            }" doc method-name arglist1 name arglist2)))
+              %s
+            }" doc method-name arglist1 invoke-body)))
 
-(defn emit-static-methods [[name arglists doc]]
+(defn emit-static-methods [[name arglists doc async]]
   (let [
         method-names (if (= 1 (count arglists))
                        [(.ToUpper name)]
                        (map #(str (.ToUpper name) (count %)) arglists))]
-    (util/line-interpose (map #(emit-static-method %1 name %2 doc) method-names arglists))))
+    (util/line-interpose (map #(emit-static-method %1 name %2 doc async) method-names arglists))))
 
 (defn class-str [d]
   (let [

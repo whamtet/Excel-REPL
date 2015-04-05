@@ -31,6 +31,13 @@ Excel REPL assumes all arguments are passed as single cell selections (A1, B6 et
 
 `excel-repl.udf/export-fns` abuses Excel slightly and may fail on the first one or two invocations in a given session.
 
+##Asynchronous Export
+
+```clojure
+(defn ^:export ^:async f [x] ...)
+```
+Asynchronous export caches on arguments to f.
+
 ##Manipulate
 
 Excel REPL makes it easy to dynamically manipulate the current workbook.  Use the `in-macro-context` so that the code is evaluated inside an anonymous (Excel) macro.  Setting cell values outside this will throw an exception, however you may read values at any point in your code.
