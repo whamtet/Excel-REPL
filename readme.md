@@ -110,8 +110,9 @@ Excel REPL uses ClojureCLR which has less support than the main JVM implementati
 (require '[clojure.tools.nrepl :as nrepl])
 (require '[clojure.data.drawbridge-client :as drawbridge-client]) ;Adds Http support to Nrepl
 
-(def tcp-client (nrepl/client (nrepl/url-connect "nrepl://localhost:50000")))
-(def http-client (nrepl/client (nrepl/url-connect "http://some.server/drawbridge-client")))
+(def timeout 10000); 10 seconds
+(def tcp-client (nrepl/client (nrepl/url-connect "nrepl://localhost:50000")) timeout)
+(def http-client (nrepl/client (nrepl/url-connect "http://some.server/drawbridge-client")) timeout)
 
 (defn remote-eval-str
 "evaluates string on remote repl"

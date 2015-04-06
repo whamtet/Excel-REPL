@@ -23,17 +23,7 @@ namespace ClojureExcel
             ExcelIntegration.RegisterUnhandledExceptionHandler(
                 ex => "!!! EXCEPTION: " + ex.ToString());
         }
-        public static object SleepAsync(string ms, string message)
-        {
-            return ExcelAsyncUtil.Run("SleepAsync", new Object[] {ms, message}, delegate
-            {
-                //Debug.Print("{1:HH:mm:ss.fff} Sleeping for {0} ms", ms, DateTime.Now);
-                Thread.Sleep(int.Parse(ms));
-                //Debug.Print("{1:HH:mm:ss.fff} Done sleeping {0} ms", ms, DateTime.Now);
-                return "Woke Up at " + DateTime.Now.ToString("1:HH:mm:ss.fff") + message;
-            });
-        }
-
+        
         public static void InsertNewWorksheet(String name)
         {
             NetOffice.ExcelApi.Application app = NetOffice.ExcelApi.Application.GetActiveInstance();
