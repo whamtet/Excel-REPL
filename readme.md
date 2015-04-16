@@ -6,6 +6,10 @@ Boost your productivity with a full Clojure programming environment in Microsoft
 
 Excel REPL makes it easy to start a ClojureCLR Repl from within Excel.  Simply install it as an Excel Add-In to provide a few additional Excel Functions
 
+##Download
+
+[Here](https://github.com/whamtet/Excel-REPL/releases/download/untagged-0b96d8bb262f7a7ec914/Setup1.msi).
+
 ##Load
 
     =Load(A:A)
