@@ -8,7 +8,7 @@ Excel REPL makes it easy to start a ClojureCLR Repl from within Excel.  Simply i
 
 ##Download
 
-[Here](https://github.com/whamtet/Excel-REPL/releases/download/untagged-0b96d8bb262f7a7ec914/Setup1.msi).
+[Here](https://github.com/whamtet/Excel-REPL/releases/download/0.1/Excel-REPL.msi).
 
 ##Load
 
