@@ -1,0 +1,9 @@
+MANUAL INSTALLATION
+
+If you lack administrator privileges for the automatic installer, you can still install Excel-REPL manually.  Copy these files into
+
+C:\Users\USER\AppData\Roaming\Microsoft\AddIns
+
+where USER is your home folder.
+
+Next open Microsoft Excel and select Options, AddIns.  Add Excel-REPL and it will auto-load every time in the future.
