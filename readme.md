@@ -52,6 +52,7 @@ You may read values directly from the workbook
 (require '[excel-repl.interop :as interop])
 
 (interop/get-values "MySheet!A6")
+(interop/get-values "A6:B7")
 
 ```
 Please see [interop.clj](https://github.com/whamtet/Excel-REPL/blob/master/Excel-REPL/nrepl/excel_repl/interop.clj) for the functions to manipulate the worksheet.
