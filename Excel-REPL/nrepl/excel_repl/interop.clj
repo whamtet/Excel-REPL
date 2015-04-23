@@ -37,7 +37,7 @@
     (dec (int (re-find #"[0-9]+" s)))
     (first s)))
 
-(defn insert-value
+#_(defn insert-value
   "Inserts val at ref."
   [sheet ref val]
   (let [
@@ -72,7 +72,7 @@
         ]
     (map extend arr)))
 
-(defn insert-values
+#_(defn insert-values
   "Inserts 2d array of values at ref."
   [sheet ref values]
   (let [
@@ -102,7 +102,7 @@
       (MainClass/RaggedArray value)
       value)))
 
-(defn insert-formula
+#_(defn insert-formula
   "Takes a single formula and inserts it into one or many cells.
   Use this instead of insert-values when you have a formula.
   Because Excel-REPL abuses threads the formulas may be stale when first inserted.
@@ -117,7 +117,7 @@
     (XlCall/Excel XlCall/xlcFormulaFill (object-array [formula ref]))))
 
 
-(defn add-sheet
+#_(defn add-sheet
   "Adds new sheet to current workbook."
   [name]
   (let [
@@ -161,7 +161,7 @@
         (MainClass/my_eval source (str sheet-name))
         (require (vector sheet-name :as alias-name))))))
 
-(defmacro clear-contents
+#_(defmacro clear-contents
   "Clears an m by n grid at sheet, ref.
   Must be called inside udf/in-macro-context"
   [sheet ref m n]
