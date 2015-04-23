@@ -1,6 +1,6 @@
 MANUAL INSTALLATION
 
-If you lack administrator privileges for the automatic installer, you can still install Excel-REPL manually.  Copy these files into
+If you lack administrator privileges for the automatic installer, you can still install Excel-REPL manually.  Copy the contents of Debug into
 
 C:\Users\USER\AppData\Roaming\Microsoft\AddIns
 

@@ -135,11 +135,9 @@ Excel REPL uses ClojureCLR which has less support than the main JVM implementati
 
 For information about connecting to a Clojure repl via Http, visit [Drawbridge](https://github.com/cemerick/drawbridge).
 
-##Build and Installation
+##Build
 
 The build process is a bit of a manual hack.  Please contact the author if you want help with this.
-
-To install on a machine copy the contents of Excel-REPL/bin/Debug into ~/AppData/Roaming/Microsoft/AddIns and then add via the Excel add-ins menu.  Excel-REPL will then auto-load every time you start Excel.
 
 ##System Requirements
 
