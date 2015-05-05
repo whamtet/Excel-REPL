@@ -37,6 +37,8 @@
     (dec (int (re-find #"[0-9]+" s)))
     (first s)))
 
+;;DEPRECATED!!
+;;WRITING TO THE WORKBOOK RANDOMLY CRASHES IT.
 #_(defn insert-value
   "Inserts val at ref."
   [sheet ref val]
@@ -72,6 +74,9 @@
         ]
     (map extend arr)))
 
+
+;;DEPRECATED!!
+;;WRITING TO THE WORKBOOK RANDOMLY CRASHES IT.
 #_(defn insert-values
   "Inserts 2d array of values at ref."
   [sheet ref values]
@@ -102,6 +107,8 @@
       (MainClass/RaggedArray value)
       value)))
 
+;;DEPRECATED!!
+;;WRITING TO THE WORKBOOK RANDOMLY CRASHES IT.
 #_(defn insert-formula
   "Takes a single formula and inserts it into one or many cells.
   Use this instead of insert-values when you have a formula.
@@ -116,7 +123,8 @@
         ]
     (XlCall/Excel XlCall/xlcFormulaFill (object-array [formula ref]))))
 
-
+;;DEPRECATED!!
+;;WRITING TO THE WORKBOOK RANDOMLY CRASHES IT.
 #_(defn add-sheet
   "Adds new sheet to current workbook."
   [name]
@@ -161,6 +169,8 @@
         (MainClass/my_eval source (str sheet-name))
         (require (vector sheet-name :as alias-name))))))
 
+;;DEPRECATED!!
+;;WRITING TO THE WORKBOOK RANDOMLY CRASHES IT.
 #_(defmacro clear-contents
   "Clears an m by n grid at sheet, ref.
   Must be called inside udf/in-macro-context"
