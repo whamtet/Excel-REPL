@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectView>ShowAllFiles</ProjectView>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Program Files %28x86%29\Microsoft Office\Office14\EXCEL.EXE</StartProgram>
+    <StartArguments>"\\psf\home\documents\visual studio 2013\Projects\Excel-REPL\Excel-REPL\bin\Debug\Excel-REPL-AddIn.xll"</StartArguments>
+  </PropertyGroup>
+</Project>
