@@ -51,17 +51,8 @@
       <HintPath>..\packages\Excel-DNA.Lib.0.32.0\lib\ExcelDna.Integration.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="ExcelDna.Utilities">
-      <HintPath>..\packages\ExcelDna.Utilities.0.1.1\lib\net40\ExcelDna.Utilities.dll</HintPath>
-    </Reference>
-    <Reference Include="HtmlAgilityPack">
-      <HintPath>..\packages\HtmlAgilityPack.1.4.9\lib\Net45\HtmlAgilityPack.dll</HintPath>
-    </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>..\packages\DotNetZip.1.9.3\lib\net20\Ionic.Zip.dll</HintPath>
-    </Reference>
-    <Reference Include="Mail">
-      <HintPath>..\packages\Mail.dll.3.0.15017.1203\lib\Mail.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Dynamic, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -108,8 +99,6 @@
       <SubType>Code</SubType>
     </EmbeddedResource>
     <Compile Include="DB.cs" />
-    <Compile Include="EmailClient.cs" />
-    <Compile Include="HtmlToText.cs" />
     <Compile Include="MainClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
