@@ -1,3 +1,8 @@
+debugging tool
+tableau
+June 2nd
+kdb q
+
 #Excel REPL
 
 Boost your productivity with a full Clojure programming environment in Microsoft Excel
@@ -12,11 +17,21 @@ Excel REPL makes it easy to start a ClojureCLR Repl from within Excel.  Simply i
 
 There is a [Manual Installer](https://github.com/whamtet/Excel-REPL/releases/download/0.1/Excel-REPL.zip) if you lack administrator permissions on your machine.
 
-##Load
+##Usage
 
-    =Load(A:A)
+![Step1](Step1.png)
 
-Concatenates the contents of selected cells and evaluates them in namespace SheetName.  SheetName is the name of the current worksheet.
+Select output column
+
+![Step2](Step2.png)
+
+Type ```=Load(A:A)``` where A is the input column.  Press CTRL+SHIFT+ENTER, not just enter.
+
+[Step3](Step3.png)
+
+Create your first bug.  Excel-REPL splits the stack trace down the output column.
+
+NB: Excel 2003 or earlier does not support entire column selection.  Type ```=Load(A1:A200)``` instead.
 
 ##Export
 
