@@ -23,8 +23,24 @@ NetOffice
 OfficeApi
 VBIDEApi
 ExcelApi
+Microsoft.Office.Interop.Excel
 
 Misc
 ====
+System.Web
 System.Drawing
 System.Windows.Forms
+
+DotNetZip
+=========
+Iconic.Zip
+
+Official .NET driver for MongoDB
+================================
+
+MongoDB.Bson
+MongoDB.Driver
+
+NOTE!!!!
+Set ExcelDna.Integration reference to CopyLocal=True
+so that it may be loaded

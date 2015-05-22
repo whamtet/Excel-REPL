@@ -82,7 +82,8 @@
                        (map #(str (.ToUpper name) (count %)) arglists))]
     (util/line-interpose (map #(emit-static-method %1 name %2 doc async) method-names arglists))))
 
-(defn class-str [d]
+(defn class-str
+  ([d]
   (let [
         fns (map first d)
         fn-str (util/comma-interpose fns)
@@ -96,7 +97,7 @@
         s (.Replace s "foo;" construct-body-str)
         s (.Replace s "    private void Poo() { }" static-methods)
         ]
-    s))
+    s)))
 
 (defn get-methods [t]
   (.GetMethods t (enum-or BindingFlags/Public BindingFlags/Static)))
