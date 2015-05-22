@@ -1,8 +1,3 @@
-debugging tool
-tableau
-June 2nd
-kdb q
-
 #Excel REPL
 
 Boost your productivity with a full Clojure programming environment in Microsoft Excel
