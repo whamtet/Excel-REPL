@@ -41,12 +41,6 @@
       <HintPath>..\packages\NetOffice.Excel.1.7.2.0\lib\net45\ExcelApi.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
-    <Reference Include="ExcelDna.CustomRegistration">
-      <HintPath>Z:\Downloads\CustomRegistration\Source\ExcelDna.CustomRegistration\bin\Debug\ExcelDna.CustomRegistration.dll</HintPath>
-    </Reference>
-    <Reference Include="ExcelDna.CustomRegistration.Example">
-      <HintPath>Z:\Downloads\CustomRegistration\Source\ExcelDna.CustomRegistration.Example\bin\Debug\ExcelDna.CustomRegistration.Example.dll</HintPath>
-    </Reference>
     <Reference Include="ExcelDna.Integration">
       <HintPath>..\packages\Excel-DNA.Lib.0.32.0\lib\ExcelDna.Integration.dll</HintPath>
       <Private>True</Private>
