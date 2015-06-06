@@ -7,29 +7,20 @@ using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Reflection;
-using Ionic.Zip;
 using System.Collections.Concurrent;
 using System.Windows.Forms;
 using System.Threading;
 
 namespace ClojureExcel
 {
-    public class MainClass : IExcelAddIn
+    public class MainClass : ExcelDna.Integration.CustomUI.ExcelRibbon, IExcelAddIn
     {
         public void AutoClose() { }
         public void AutoOpen()
         {
-            Init();
+            //Init();
             ExcelIntegration.RegisterUnhandledExceptionHandler(
                 ex => "!!! EXCEPTION: " + ex.ToString());
-        }
-        
-        public static void InsertNewWorksheet(String name)
-        {
-            NetOffice.ExcelApi.Application app = NetOffice.ExcelApi.Application.GetActiveInstance();
-            var book = app.ActiveWorkbook;
-            var sheets = book.Worksheets;
-
         }
 
         private static Object GetFirst(Object o)
@@ -37,7 +28,7 @@ namespace ClojureExcel
             return ((Object[,])o)[0, 0];
         }
 
-        public static IFn export_udfs, invoke_anonymous_macros;
+        public static IFn export_udfs, format_code;
 
         public static void ExportUdfs()
         {
@@ -48,20 +39,6 @@ namespace ClojureExcel
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
-            }
-        }
-
-        [ExcelCommand]
-        public static object InvokeAnonymousMacros()
-        {
-            try
-            {
-                return invoke_anonymous_macros.invoke();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-                return null;
             }
         }
 
@@ -83,14 +60,6 @@ namespace ClojureExcel
             }
             Integration.RegisterMethods(l);
         }
-
-//        [ExcelCommand(MenuName = "f", MenuText = "f")]
-//        public static void f()
-//        {
-//            var app = ExcelDnaUtil.Application as Microsoft.Office.Interop.Excel.Application;
-//            app.Selection.Insert();
-//        }
-
         
         private static void Init()
         {
@@ -98,25 +67,17 @@ namespace ClojureExcel
             {
                 var assembly = Assembly.GetExecutingAssembly();
 
-                var resourceName = "Excel_REPL.nrepl.zip";
-                Stream stream = assembly.GetManifestResourceStream(resourceName);
-                ZipFile f = ZipFile.Read(stream);
-
-                string tempPath = System.IO.Path.GetTempPath();
-                string tempFolder = tempPath + "Excel_REPL\\";
-                f.ExtractAll(tempFolder, ExtractExistingFileAction.OverwriteSilently);
-                stream.Close();
-                tempFolder += "nrepl\\";
-                appendLoadPath(tempFolder);
+                appendLoadPath("nrepl");
+                appendLoadPath("C:\\Program Files (x86)\\Excel-REPL\\Excel-REPL\\nrepl");
 
                 String clojureSrc = ResourceSlurp("excel-repl.clj");
-                msg = (String)GetFirst(my_eval(clojureSrc, "clojure.core"));
+                GetFirst(my_eval(clojureSrc, "clojure.core"));
                 //try loading main within main
                 String main_load = @"
-(require '[excel-repl.interop :as interop])
-(interop/require-sheet '[main A])
-(main/main)
+(require '[excel-repl.formatting :as formatting])
+(str 'done)
 ";
+                msg = (String)GetFirst(my_eval(main_load, "user"));
             }
             catch (Exception e)
             {
@@ -146,11 +107,10 @@ namespace ClojureExcel
             Environment.SetEnvironmentVariable("CLOJURE_LOAD_PATH", loadPath);
             return loadPath;
         }
-        private static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
- //       private static IFn is_nil = clojure.clr.api.Clojure.var("clojure.core", "nil?");
-        private static IFn slurp = clojure.clr.api.Clojure.var("clojure.core", "slurp");
-//        private static IFn number = clojure.clr.api.Clojure.var("clojure.core", "number?");
-        public static Dictionary<String, String> d = new Dictionary<String, String>();
+        public static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
+        public static IFn slurp = clojure.clr.api.Clojure.var("clojure.core", "slurp");
+        public static IFn spit = clojure.clr.api.Clojure.var("clojure.core", "spit");
+        //public static Dictionary<String, String> d = new Dictionary<String, String>();
         private static string msg = "nothing";
 
 
