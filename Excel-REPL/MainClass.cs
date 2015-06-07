@@ -14,7 +14,7 @@ using System.Threading;
 
 namespace ClojureExcel
 {
-    public class MainClass : IExcelAddIn
+    public class MainClass : ExcelDna.Integration.CustomUI.ExcelRibbon, IExcelAddIn
     {
         public void AutoClose() { }
         public void AutoOpen()
