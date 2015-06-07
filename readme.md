@@ -143,6 +143,15 @@ Excel REPL uses ClojureCLR which has less support than the main JVM implementati
 
 For information about connecting to a Clojure repl via Http, visit [Drawbridge](https://github.com/cemerick/drawbridge).
 
+##NREPL Server
+
+You may also use Excel-REPL as an nrepl server.  This makes it easy to push data over to the spreadsheet
+
+```clojure
+(require '[clojure.tools.nrepl.server :as server])
+(defonce server (server/start-server))
+```
+
 ##Build
 
 The build process is a bit of a manual hack.  Please contact the author if you want help with this.
