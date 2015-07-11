@@ -9,13 +9,6 @@ public class Class1
 {
     private static IFn ifn_list;
 
-    public Class1(IFn foo)
-    {
-        foo;
-    }
-
-    private void Poo() { }
-
     private static Object cleanValue(object o)
     {
         if (o == null)

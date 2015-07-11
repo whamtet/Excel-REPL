@@ -41,7 +41,7 @@ namespace ClojureExcel
                 MessageBox.Show(e.ToString());
             }
         }
-
+        //referenced by excel-repl.udf
         public static Object AssemblyPaths()
         {
             var assemblies = AppDomain.CurrentDomain
@@ -65,8 +65,7 @@ namespace ClojureExcel
         {
             try
             {
-                var assembly = Assembly.GetExecutingAssembly();
-
+                
                 appendLoadPath("nrepl");
                 appendLoadPath("C:\\Program Files (x86)\\Excel-REPL\\Excel-REPL\\nrepl");
 
@@ -110,7 +109,6 @@ namespace ClojureExcel
         public static IFn load_string = clojure.clr.api.Clojure.var("clojure.core", "load-string");
         public static IFn slurp = clojure.clr.api.Clojure.var("clojure.core", "slurp");
         public static IFn spit = clojure.clr.api.Clojure.var("clojure.core", "spit");
-        //public static Dictionary<String, String> d = new Dictionary<String, String>();
         private static string msg = "nothing";
 
 

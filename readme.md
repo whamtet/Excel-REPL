@@ -2,8 +2,6 @@
 
 Boost your productivity with a full Clojure programming environment in Microsoft Excel
 
-![Screenshot](Spreadsheet Snapshot.png)
-
 Excel REPL makes it easy to start a ClojureCLR Repl from within Excel.  Simply install it as an Excel Add-In to provide a few additional Excel Functions
 
 ##Download
@@ -27,6 +25,11 @@ Create your first bug.  Excel-REPL splits the stack trace down the output column
 NB: Excel 2003 or earlier does not support entire column selection.  Type ```=Load(A1:A200)``` instead.
 
 ![Step3](Step3.png)
+
+##Demo Spreadsheet.
+
+Download [Excel-REPL.xlsx](https://github.com/whamtet/Excel-REPL/releases/download/0.1/Excel-REPL.xlsx) for a quick demo.
+If this doesn't work correctly you must have an installation error.  Please contact the author straight away.
 
 ##Export
 
