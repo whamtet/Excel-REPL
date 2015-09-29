@@ -86,7 +86,7 @@ WARNING: Only `Load` can be used in this way.  If you return exported functions 
 
 Errors are caught and returned as text within the output cells.  The stacktrace is split down the column so select multiple cells for output as mentioned above.
 
-##Auxilliary Methods
+##Auxiliary Methods
 
 Excel REPL adds useful functions and macros to clojure.core that are useful when interacting with a worksheet.  Please see [excel-repl.clj](https://github.com/whamtet/Excel-REPL/blob/master/Excel-REPL/excel-repl.clj) for details.
 
