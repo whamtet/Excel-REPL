@@ -6,7 +6,7 @@ Excel REPL makes it easy to start a ClojureCLR Repl from within Excel.  Simply i
 
 ##Download
 
-[Installer](https://github.com/whamtet/Excel-REPL/releases/download/0.1/Excel-REPL.msi) (requires administrator permissions).
+[Installer](https://github.com/whamtet/Excel-REPL/releases/download/0.1/Excel-REPL.exe) (requires administrator permissions).
 
 There is a [Manual Installer](https://github.com/whamtet/Excel-REPL/releases/download/0.1/Excel-REPL.zip) if you lack administrator permissions on your machine.
 
