@@ -56,17 +56,27 @@
 (defn emit-static-method [method-name name arglist doc async]
   (let [
         doc (format "[ExcelFunction(Description=@\"%s\")]" (or doc ""))
-        arg-types (map #(if (vector? %) "Object[] " "Object ") arglist)
+        f #(if (vector? %)
+             (if (vector? (first %))
+               "Object[,] "
+               "Object[] ")
+             "Object ")
+        arg-types (map f arglist)
         clean-args (map #(if (vector? %) (gensym) (clean-str %)) arglist)
         arglist1 (util/comma-interpose (map str arg-types clean-args))
-        arglist2 (util/comma-interpose clean-args)
+        clean-args2 (map (fn [original-arg cleaned]
+                           (if (and (vector? original-arg) (vector? (first original-arg)))
+                             (format "RaggedArray(%s)" cleaned)
+                             cleaned)) arglist clean-args)
+        arglist2 (util/comma-interpose clean-args2)
+        arglist3 (util/comma-interpose clean-args)
 
         invoke-body (format "try { return cleanValue(%s.invoke(%s)); } catch (Exception e) {return e.ToString();}" name arglist2)
         invoke-body (if async
                       (format "return ExcelAsyncUtil.Run(\"\", new Object[]{%s}, delegate
                               {
                               %s
-                              });" arglist2 invoke-body)
+                              });" arglist3 invoke-body)
                       invoke-body)
         ]
     (format "%s
@@ -106,6 +116,7 @@
   (let [d (filter-all-interns)]
     (if (not-empty d)
       (let [
+            _ (-> d class-str util/to-clipboard)
             t (-> d class-str my-compile .CompiledAssembly .GetTypes first)
             types (map last d)
             constructor-args (object-array types)
@@ -129,7 +140,7 @@
   (or (last (map #(%) (schedule-udf/get-fns))) "Result Empty"))
 
 (set! MainClass/export_udfs export-udfs)
-(set! MainClass/invoke_anonymous_macros invoke-anonymous-macros)
+;(set! MainClass/invoke_anonymous_macros invoke-anonymous-macros)
 
 (defn split-words [n s]
   (loop [

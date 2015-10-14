@@ -2,6 +2,7 @@
 
 (import System.Environment)
 (import System.IO.Directory)
+(import System.Windows.Forms.MessageBox)
 
 ;(import NetOffice.ExcelApi.Application)
 
@@ -9,6 +10,11 @@
 (require 'clojure.pprint)
 (require '[clojure.string :as string])
 (require 'clojure.walk)
+
+(defn show
+  "Show MessageBox"
+  [x]
+  (MessageBox/Show x))
 
 (defn get-cd
   "returns current directory as a string"

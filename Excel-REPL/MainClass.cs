@@ -18,7 +18,7 @@ namespace ClojureExcel
         public void AutoClose() { }
         public void AutoOpen()
         {
-            //Init();
+            Init();
             ExcelIntegration.RegisterUnhandledExceptionHandler(
                 ex => "!!! EXCEPTION: " + ex.ToString());
         }
@@ -65,8 +65,7 @@ namespace ClojureExcel
         {
             try
             {
-                
-                appendLoadPath("nrepl");
+                appendLoadPath("Z:\\Documents\\Visual Studio 2013\\Projects\\Excel-REPL\\Excel-REPL\\nrepl");
                 appendLoadPath("C:\\Program Files (x86)\\Excel-REPL\\Excel-REPL\\nrepl");
 
                 String clojureSrc = ResourceSlurp("excel-repl.clj");

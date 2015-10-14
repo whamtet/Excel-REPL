@@ -38,7 +38,9 @@ If this doesn't work correctly you must have an installation error.  Please cont
 
 (defn ^:export g ([] "No Args") ([x] "One Arg"))
 
-(defn ^:export h [single-cell-argument [excel-array-argument]] ...)
+(defn ^:export h [single-cell-argument [_ :as excel-array-argument]] ...)
+
+(defn ^:export i [[[_] :as two-d-array] ...)
 
 (require 'excel-repl.udf)
 (excel-repl.udf/export-fns) ;exports the above functions
@@ -46,7 +48,7 @@ If this doesn't work correctly you must have an installation error.  Please cont
 
 `excel-repl.udf/export-fns` will export as Excel user defined functions all functions with `^:export` metadata in the current namespace.  Functions with a single arglist are simply exported as their name.  Multiarity functions include the arity.  In the example above f will export `=F()` and g will export `=G0()` and `=G1(x)`.
 
-Excel REPL assumes all arguments are passed as single cell selections (A1, B6 etc).  To indicate that an argument should be an array selection declare that argument with vector destructuring.
+Excel REPL assumes all arguments are passed as single cell selections (A1, B6 etc).  To indicate that an argument should be an array selection declare that argument with vector destructuring.  For 2D arrays use double destructuring.
 
 `excel-repl.udf/export-fns` abuses Excel slightly and may fail on the first one or two invocations in a given session.
 

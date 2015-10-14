@@ -9,6 +9,13 @@ public class Class1
 {
     private static IFn ifn_list;
 
+    public Class1(IFn foo)
+    {
+        foo;
+    }
+
+    private void Poo() { }
+
     private static Object cleanValue(object o)
     {
         if (o == null)
@@ -41,6 +48,28 @@ public class Class1
         {
             return o.ToString();
         }
+    }
+
+    public static Object RaggedArray(Object arrayCandidate)
+    {
+        var input = arrayCandidate as Object[,];
+        if (input == null)
+        {
+            return arrayCandidate;
+        }
+        int m = input.GetUpperBound(0) + 1;
+        int n = input.GetUpperBound(1) + 1;
+        Object[][] output = new Object[m][];
+        for (int i = 0; i < m; i++)
+        {
+            Object[] row = new Object[n];
+            for (int j = 0; j < n; j++)
+            {
+                row[j] = input[i, j];
+            }
+            output[i] = row;
+        }
+        return output;
     }
     
 
