@@ -164,3 +164,12 @@ The build process is a bit of a manual hack.  Please contact the author if you w
 ##System Requirements
 
 Excel Repl works with Microsoft Excel 97+ (that's quite old) and Microsoft .NET 4.0 or 4.5.
+
+##Gotchas
+
+Be careful when spitting.  Excel sometimes runs the code several times, creating a race condition.  Use the following pattern
+
+```clojure
+(defonce o (Object.))
+(locking o (spit my-file contents))
+```
