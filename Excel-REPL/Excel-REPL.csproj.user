@@ -5,7 +5,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Program</StartAction>
-    <StartProgram>C:\Program Files\Microsoft Office 15\root\office15\excel.exe</StartProgram>
-    <StartArguments>"\\psf\home\documents\visual studio 2013\Projects\Excel-REPL\Excel-REPL\bin\Debug\Excel-REPL-AddIn.xll"</StartArguments>
+    <StartProgram>C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE</StartProgram>
+    <StartArguments>"Z:\Downloads\Excel-REPL\Excel-REPL\bin\Debug\Excel-REPL-AddIn.xll"</StartArguments>
   </PropertyGroup>
 </Project>

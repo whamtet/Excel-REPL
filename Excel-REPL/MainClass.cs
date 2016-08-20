@@ -65,17 +65,17 @@ namespace ClojureExcel
         {
             try
             {
-                appendLoadPath("Z:\\Documents\\Visual Studio 2013\\Projects\\Excel-REPL\\Excel-REPL\\nrepl");
-                appendLoadPath("C:\\Program Files (x86)\\Excel-REPL\\Excel-REPL\\nrepl");
+                string path = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)).FullName;
+                if (Environment.OSVersion.Version.Major >= 6)
+                {
+                    path = Directory.GetParent(path).ToString();
+                }
+                
 
                 String clojureSrc = ResourceSlurp("excel-repl.clj");
-                GetFirst(my_eval(clojureSrc, "clojure.core"));
-                //try loading main within main
-                String main_load = @"
-(require '[excel-repl.formatting :as formatting])
-(str 'done)
-";
-                msg = (String)GetFirst(my_eval(main_load, "user"));
+                GetFirst(my_eval2(clojureSrc, "clojure.core"));
+                clojureSrc = ResourceSlurp("interop.clj");
+                my_eval2(clojureSrc, "excel-repl.interop");
             }
             catch (Exception e)
             {
@@ -118,14 +118,15 @@ namespace ClojureExcel
         
         public static Object my_eval(String input)
         {
-            return my_eval(input, getSheetName());
+            return my_eval2(input, getSheetName());
         }
-        public static Object my_eval(String input, String sheetName)
+
+        public static Object my_eval2(String input, String sheetName)
         {
             Object o;
             try
             {
-                if (!input.StartsWith("(ns"))
+                if (!input.Trim().StartsWith("(ns"))
                 {
                     input = String.Format("(ns {0})\n", sheetName) + input;
                 }

@@ -4,6 +4,10 @@
 (import System.IO.Directory)
 (import System.Windows.Forms.MessageBox)
 
+(import ExcelDna.Integration.ExcelReference)
+(import ExcelDna.Integration.XlCall)
+(import ClojureExcel.MainClass)
+
 ;(import NetOffice.ExcelApi.Application)
 
 (require '[clojure.repl :as r])
@@ -69,12 +73,11 @@
   [x]
   `(with-out-strs (time ~x)))
 
-;;otha stuff
 
-#_(def letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-#_(def letter->val (into {} (map-indexed (fn [i s] [s i]) letters)))
+(def letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+(def letter->val (into {} (map-indexed (fn [i s] [s i]) letters)))
 
-#_(defn letter->val2
+(defn letter->val2
   "column number of excel coumn A, AZ etc"
   [[s t :as ss]]
   (if t
@@ -84,80 +87,31 @@
                 (map #(Math/Pow 26 %) (range))))
     (letter->val s)))
 
-#_(defn letter->val3
+(defn col-num
   "column number of reference in form A4 etc"
   [s]
-  (letter->val2 (re-find #"[A-Z]+" s)))
+  (if (string? s)
+    (letter->val2 (re-find #"[A-Z]+" s))
+    (second s)))
 
-#_(defn selection-width
-  "selection width of reference in form A1:B2"
-  [select-str]
+(defn row-num
+  [s]
+  (if (string? s)
+    (dec (int (re-find #"[0-9]+" s)))
+    (first s)))
+
+(defn get-values
+  "Returns values at ref which is of the form A1 or A1:B6.
+  Single cell selections are returned as a value, 2D selections as an Object[][] array"
+  [sheet ref]
   (let [
-        [a b] (string/split select-str #"!")
-        select-str (or b a)
+        refs (if (.Contains ref ":") (string/split ref #":") [ref ref])
+        [i id] (map row-num refs)
+        [j jd] (map col-num refs)
+        value (.GetValue (ExcelReference. i id j jd sheet))
         ]
-    (inc (Math/Abs (apply - (map letter->val3 (string/split select-str #":")))))))
+    (if (.Contains ref ":")
+      (MainClass/RaggedArray value)
+      value)))
 
-#_(defn transpose
-  "transpose 2d array"
-  [arr]
-  (let [n (count (first arr))]
-    (vec
-     (for [j (range n)]
-       (mapv #(nth % j) arr)))))
-
-#_(defn partition-range
-  "processes values into 2d array if necessary"
-  [values select-str]
-  (let [
-        selection-width (selection-width select-str)
-        ]
-    (if (= 1 selection-width)
-      (vec values)
-      (let [
-            m (partition selection-width values)
-            ]
-        (if (.EndsWith select-str "'")
-          (transpose m)
-          (mapv vec m))))))
-
-#_(defn range-values
-  "Returns array of values selected by select-str."
-  [app select-str]
-  (let [
-        select-str2 (.Replace select-str "'" "")
-        range (.Range app select-str2)
-        ]
-    (if (.Contains select-str ":")
-      (partition-range (map #(.Value %) range) select-str)
-      ;(mapv #(.Value %) range)
-      (.Value range))))
-
-#_(defn excel-reference? [ref]
-  (if (symbol? ref)
-    (re-find #"[A-Z]+[0-9]+" (str ref))))
-
-#_(defmacro with-excel-refs
-    "Expands excel references of the form A1 A2:B6 or Sheet3!A3 etc.
-    References must be symbols.  External references are not supported.
-
-    Two dimensional references are returned as row wise arrays.  To transpose
-    append with a dash e.g. A2:B4'
-    "
-    [x]
-    (let [
-          app (Application/GetActiveInstance)
-          f #(if (excel-reference? %)
-               (range-values app (str %))
-               %)
-          ]
-      (clojure.walk/prewalk f x)))
-
-
-#_(defmacro in-macro-context
-  [& body]
-  `(do
-     (defn ^:excel-macro f#
-       [] ~@body)
-     (excel-repl.udf/export-fns)
-     (.Run (NetOffice.ExcelApi.Application/GetActiveInstance) (excel-repl.udf/clean-str 'f#))))
+;;otha stuff

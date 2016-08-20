@@ -8,7 +8,9 @@
 (import NetOffice.ExcelApi.Application)
 
 (require '[clojure.string :as str])
-(require '[excel-repl.util :as util])
+
+(defn comma-interpose [s] (apply str (interpose ", " s)))
+(defn line-interpose [s] (apply str (interpose "\r\n" s)))
 
 
 (def letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -53,7 +55,7 @@
   (map #(str "\"" (apply str %) "\"") (partition-all 250 s)))
 
 (defn concatenated-str [s]
-  (format "CONCATENATE(%s)" (util/comma-interpose (split-str s))))
+  (format "CONCATENATE(%s)" (comma-interpose (split-str s))))
 
 (defn excel-pr-str [s]
   (if (string? s) (concatenated-str (.Replace s "\"" "\"\"")) s))
@@ -62,7 +64,7 @@
   "Generates Excel formula string =f(arg1, \"arg2\"...).
   Long strings a split via =CONCATENATE to conform to the Excel 255 character limit"
   [f & args]
-  (format "=%s(%s)" f (util/comma-interpose (map excel-pr-str args))))
+  (format "=%s(%s)" f (comma-interpose (map excel-pr-str args))))
 
 
 (defn regularize-array
@@ -161,7 +163,7 @@
             (apply str
                    (flatten
                     (for [col cols]
-                      (util/line-interpose
+                      (line-interpose
                        (filter string?
                                (map first
                                     (get-values (str sheet-name) (format "%s1:%s200" col col))))))))
