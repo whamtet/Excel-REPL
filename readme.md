@@ -1,16 +1,16 @@
-#Excel REPL
+# Excel REPL
 
 Boost your productivity with a full Clojure programming environment in Microsoft Excel
 
 Excel REPL makes it easy to start a ClojureCLR Repl from within Excel.  Simply install it as an Excel Add-In to provide a few additional Excel Functions
 
-##Download
+## Download
 
 [Installer](https://github.com/whamtet/Excel-REPL/releases/download/0.1/Excel-REPL.exe) (requires administrator permissions).
 
 There is a [Manual Installer](https://github.com/whamtet/Excel-REPL/releases/download/0.1/Excel-REPL.zip) if you lack administrator permissions on your machine.
 
-##Usage
+## Usage
 
 Select output column
 
@@ -26,12 +26,12 @@ NB: Excel 2003 or earlier does not support entire column selection.  Type ```=Lo
 
 ![Step3](Step3.png)
 
-##Demo Spreadsheet.
+## Demo Spreadsheet.
 
 Download [Excel-REPL.xlsx](https://github.com/whamtet/Excel-REPL/releases/download/0.1/Excel-REPL.xlsx) for a quick demo.
 If this doesn't work correctly you must have an installation error.  Please contact the author straight away.
 
-##Export
+## Export
 
 ```clojure
 (defn ^:export f [] ...)
@@ -52,14 +52,14 @@ Excel REPL assumes all arguments are passed as single cell selections (A1, B6 et
 
 `excel-repl.udf/export-fns` abuses Excel slightly and may fail on the first one or two invocations in a given session.
 
-##Asynchronous Export
+## Asynchronous Export
 
 ```clojure
 (defn ^:export ^:async f [x] ...)
 ```
 Asynchronous export caches on arguments to f.
 
-##Read workbook
+## Read workbook
 
 You may read values directly from the workbook
 
@@ -72,7 +72,7 @@ You may read values directly from the workbook
 ```
 Please see [interop.clj](https://github.com/whamtet/Excel-REPL/blob/master/Excel-REPL/nrepl/excel_repl/interop.clj) for the functions to manipulate the worksheet.
 
-##Returning 1D and 2D arrays
+## Returning 1D and 2D arrays
 
 If `Load` returns a 1 or 2 dimensional collection you may paste it into a range of Excel Cells.  To do so
 
@@ -84,11 +84,11 @@ If `Load` returns a 1 or 2 dimensional collection you may paste it into a range 
 
 WARNING: Only `Load` can be used in this way.  If you return exported functions in this way Excel will crash.
 
-##Error Messages
+## Error Messages
 
 Errors are caught and returned as text within the output cells.  The stacktrace is split down the column so select multiple cells for output as mentioned above.
 
-##Auxiliary Methods
+## Auxiliary Methods
 
 Excel REPL adds useful functions and macros to clojure.core that are useful when interacting with a worksheet.  Please see [excel-repl.clj](https://github.com/whamtet/Excel-REPL/blob/master/Excel-REPL/excel-repl.clj) for details.
 
@@ -108,7 +108,7 @@ If you wish to pull stuff off the net straight into your worksheet [clr-http-lit
 
 ```
 
-##Database
+## Database
 
 Excel REPL provides convenience methods for connecting directly to a mongo database
 
@@ -121,7 +121,7 @@ Excel REPL provides convenience methods for connecting directly to a mongo datab
 (-> connection (DB/Get "test-values") coerce-db/mongo->clojure str); {:hi "there"}
 ```
 
-##NREPL
+## NREPL
 
 Excel REPL uses ClojureCLR which has less support than the main JVM implementation.  You may wish to connect to an external Clojure repl.  Both HTTP and TCP connections are supported.
 
@@ -148,7 +148,7 @@ Excel REPL uses ClojureCLR which has less support than the main JVM implementati
 
 For information about connecting to a Clojure repl via Http, visit [Drawbridge](https://github.com/cemerick/drawbridge).
 
-##NREPL Server
+## NREPL Server
 
 You may also use Excel-REPL as an nrepl server.  This makes it easy to push data over to the spreadsheet
 
@@ -157,15 +157,15 @@ You may also use Excel-REPL as an nrepl server.  This makes it easy to push data
 (defonce server (server/start-server))
 ```
 
-##Build
+## Build
 
 The build process is a bit of a manual hack.  Please contact the author if you want help with this.
 
-##System Requirements
+## System Requirements
 
 Excel Repl works with Microsoft Excel 97+ (that's quite old) and Microsoft .NET 4.0 or 4.5.
 
-##Gotchas
+## Gotchas
 
 Be careful when spitting.  Excel sometimes runs the code several times, creating a race condition.  Use the following pattern
 
